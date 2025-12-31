@@ -4,6 +4,7 @@ export * from "./scoring";
 export * from "./datasheetSchema";
 export * from "./storage";
 export * from "./svg";
+export * from "./brand";
 
 // Import JSON data
 import scenariosData from "./scenarios.json";
