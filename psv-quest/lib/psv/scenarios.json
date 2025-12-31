@@ -1,0 +1,131 @@
+[
+  {
+    "id": "steam-header-blocked",
+    "title": "Steam Header – Blocked Outlet",
+    "description": "A high-pressure steam header feeds multiple process units. A downstream isolation valve may be inadvertently closed, creating a blocked outlet scenario. The PSV must protect the header from overpressure. Discharge is to atmosphere via a silencer.",
+    "serviceType": "steam",
+    "difficulty": 2,
+    "constraints": [
+      "Discharge to atmosphere (no backpressure concerns)",
+      "Set pressure at MAWP of 150 psig",
+      "Steam is saturated at relieving conditions",
+      "No variable backpressure – conventional valve acceptable"
+    ],
+    "datasheetRequirements": [
+      "relievingCase",
+      "dischargeTo",
+      "setPressurePsig",
+      "relievingTempF",
+      "serviceType",
+      "requiredMassFlowLbHr",
+      "mw",
+      "k",
+      "z"
+    ],
+    "visuals": {
+      "thumbnail": "steam_header_thumbnail",
+      "widgets": ["ReliefPathDiagram", "ValveCutaway", "OrificeWheel"]
+    },
+    "attachments": [
+      {
+        "id": "pid-steam",
+        "title": "P&ID Snippet – Steam Header",
+        "type": "markdown",
+        "contentRef": "Steam header at 150 psig MAWP. Supply from boiler house. Feeds Unit 100, Unit 200, Unit 300. PSV-101 protects header. Discharge routed to atmosphere via silencer. No backpressure header."
+      },
+      {
+        "id": "process-note-steam",
+        "title": "Process Note",
+        "type": "markdown",
+        "contentRef": "Maximum steam flow from boiler: 25,000 lb/hr. In blocked outlet scenario, full boiler output must be relieved. Steam properties at 150 psig saturated: T = 366°F, MW = 18.02, k = 1.33, Z ≈ 0.95."
+      }
+    ]
+  },
+  {
+    "id": "gas-flare-backpressure",
+    "title": "Gas Service to Flare – Variable Backpressure",
+    "description": "A process gas compressor discharge vessel requires overpressure protection. The PSV discharges to a common flare header shared with multiple units. During upset conditions, flare header pressure can fluctuate significantly, creating variable backpressure concerns.",
+    "serviceType": "gas",
+    "difficulty": 3,
+    "constraints": [
+      "Discharge to flare header (variable backpressure)",
+      "Superimposed backpressure: 15-45 psig (variable)",
+      "Built-up backpressure must be considered",
+      "Backpressure exceeds 10% of set pressure – conventional valve NOT suitable",
+      "Set pressure at 200 psig"
+    ],
+    "datasheetRequirements": [
+      "relievingCase",
+      "dischargeTo",
+      "setPressurePsig",
+      "relievingTempF",
+      "serviceType",
+      "requiredMassFlowLbHr",
+      "mw",
+      "k",
+      "z",
+      "superimposedBackpressurePsig",
+      "builtUpBackpressurePsig"
+    ],
+    "visuals": {
+      "thumbnail": "flare_line_thumbnail",
+      "widgets": ["ReliefPathDiagram", "BackpressureGauge", "ValveCutaway", "OrificeWheel"]
+    },
+    "attachments": [
+      {
+        "id": "pid-gas",
+        "title": "P&ID Snippet – Compressor Discharge",
+        "type": "markdown",
+        "contentRef": "Compressor K-101 discharge vessel V-101. MAWP 200 psig. PSV-201 on vessel top. Discharge ties into 8\" flare header. Header serves Units 100-400. Note: Flare header pressure varies 15-45 psig during upsets."
+      },
+      {
+        "id": "process-note-gas",
+        "title": "Process Note",
+        "type": "markdown",
+        "contentRef": "Relief case: Control valve failure (FV-101 fails open). Max flow: 15,000 lb/hr. Gas: Hydrocarbon mix, MW=32, k=1.25, Z=0.92. Relieving temp: 250°F. Expected built-up BP in discharge piping: ~20 psig."
+      }
+    ]
+  },
+  {
+    "id": "liquid-thermal-expansion",
+    "title": "Liquid Thermal Expansion Case",
+    "description": "A heat exchanger shell containing a liquid hydrocarbon can be blocked in during maintenance or turnaround. Solar radiation or residual heat can cause thermal expansion of the trapped liquid. A thermal relief valve is required to prevent hydraulic overpressure.",
+    "serviceType": "liquid",
+    "difficulty": 2,
+    "constraints": [
+      "Thermal expansion case – small flow, critical selection",
+      "Liquid service – volumetric flow basis",
+      "Discharge to closed drain system",
+      "Set pressure at 75 psig (exchanger MAWP)",
+      "Minimal backpressure in closed drain"
+    ],
+    "datasheetRequirements": [
+      "relievingCase",
+      "dischargeTo",
+      "setPressurePsig",
+      "relievingTempF",
+      "serviceType",
+      "requiredVolFlowGpm",
+      "densitySg",
+      "viscosityCp"
+    ],
+    "visuals": {
+      "thumbnail": "pump_thermal_thumbnail",
+      "widgets": ["ReliefPathDiagram", "ValveCutaway", "OrificeWheel"]
+    },
+    "attachments": [
+      {
+        "id": "pid-liquid",
+        "title": "P&ID Snippet – Heat Exchanger E-101",
+        "type": "markdown",
+        "contentRef": "Shell & Tube Exchanger E-101. Shell side: Light hydrocarbon liquid. MAWP 75 psig. Block valves on inlet/outlet allow isolation. PSV-301 (thermal relief) on shell. Discharge to closed drain header."
+      },
+      {
+        "id": "process-note-liquid",
+        "title": "Process Note",
+        "type": "markdown",
+        "contentRef": "Thermal expansion relief: Expected flow ~3 GPM based on heat input calculation. Fluid: Light naphtha, SG=0.68, viscosity ~0.5 cP. Relieving temp assumed 150°F. Closed drain header pressure negligible (<5 psig)."
+      }
+    ]
+  }
+]
