@@ -1,0 +1,131 @@
+[
+  {
+    "scenarioId": "steam-header-blocked",
+    "correctRelievingCase": "blocked_outlet",
+    "correctValveStyle": "conventional",
+    "correctOrificeLetter": "K",
+    "rationaleBullets": [
+      "Blocked outlet is the governing case when downstream valve closure can trap the full boiler steam output.",
+      "Atmospheric discharge means no backpressure concerns – superimposed BP is zero.",
+      "With no variable backpressure, a conventional valve is the most cost-effective choice.",
+      "Orifice K provides adequate capacity for 25,000 lb/hr steam at the given conditions.",
+      "Always verify discharge piping is adequately sized to prevent excessive built-up backpressure."
+    ],
+    "commonMistakes": [
+      {
+        "key": "wrong_case_fire",
+        "message": "Fire case was selected, but the scenario describes an operational blocked outlet – not an external fire event."
+      },
+      {
+        "key": "bellows_unnecessary",
+        "message": "Bellows or pilot valve selected, but atmospheric discharge has no backpressure concerns. Conventional is simpler and lower cost."
+      },
+      {
+        "key": "undersized_orifice",
+        "message": "Orifice undersized – would not pass the required relief rate. Always match capacity to the relieving load."
+      },
+      {
+        "key": "missing_mw",
+        "message": "Molecular weight not entered – required for steam/gas capacity verification."
+      }
+    ],
+    "requiredFieldsForFullCredit": [
+      "relievingCase",
+      "dischargeTo",
+      "setPressurePsig",
+      "relievingTempF",
+      "serviceType",
+      "requiredMassFlowLbHr",
+      "mw",
+      "k",
+      "z"
+    ]
+  },
+  {
+    "scenarioId": "gas-flare-backpressure",
+    "correctRelievingCase": "control_valve_failure",
+    "correctValveStyle": "bellows",
+    "correctOrificeLetter": "J",
+    "rationaleBullets": [
+      "Control valve failure (fails open) is the governing case – max flow through FV-101.",
+      "Variable superimposed backpressure (15-45 psig) requires a balanced valve design.",
+      "Bellows valve isolates the spring chamber from backpressure, maintaining consistent set pressure.",
+      "Pilot valve would also work, but bellows is preferred for moderate backpressure ranges.",
+      "Conventional valve would experience set point shift due to backpressure – NOT acceptable.",
+      "Total backpressure (superimposed + built-up) must be evaluated for capacity correction."
+    ],
+    "commonMistakes": [
+      {
+        "key": "conventional_with_bp",
+        "message": "Conventional valve selected with variable backpressure. This causes set pressure shift and unreliable protection."
+      },
+      {
+        "key": "ignored_superimposed_bp",
+        "message": "Superimposed backpressure not entered. This is critical for valve style selection in flare service."
+      },
+      {
+        "key": "wrong_case_blocked",
+        "message": "Blocked outlet selected, but the scenario specifies control valve failure as the relief case."
+      },
+      {
+        "key": "oversized_orifice",
+        "message": "Orifice oversized – while not unsafe, leads to valve chatter and poor performance at low flows."
+      }
+    ],
+    "requiredFieldsForFullCredit": [
+      "relievingCase",
+      "dischargeTo",
+      "setPressurePsig",
+      "relievingTempF",
+      "serviceType",
+      "requiredMassFlowLbHr",
+      "mw",
+      "k",
+      "z",
+      "superimposedBackpressurePsig",
+      "builtUpBackpressurePsig"
+    ]
+  },
+  {
+    "scenarioId": "liquid-thermal-expansion",
+    "correctRelievingCase": "thermal_expansion",
+    "correctValveStyle": "conventional",
+    "correctOrificeLetter": "D",
+    "rationaleBullets": [
+      "Thermal expansion is the correct case – trapped liquid expanding due to heat input.",
+      "Liquid service uses volumetric flow (GPM) as the capacity basis, not mass flow.",
+      "Closed drain discharge with negligible backpressure allows conventional valve selection.",
+      "Small orifice (D) is appropriate for the low flow rate (~3 GPM).",
+      "Thermal relief valves are critical safety devices often overlooked during hazard reviews.",
+      "Liquid properties (SG, viscosity) must be documented for proper valve sizing."
+    ],
+    "commonMistakes": [
+      {
+        "key": "wrong_case_blocked",
+        "message": "Blocked outlet selected – while technically blocked, the relieving mechanism is thermal expansion, not pressure buildup from flow."
+      },
+      {
+        "key": "used_mass_flow",
+        "message": "Mass flow entered instead of volumetric flow. Liquid thermal relief uses GPM."
+      },
+      {
+        "key": "oversized_orifice_liquid",
+        "message": "Large orifice selected for a 3 GPM flow. This leads to chatter and poor seating."
+      },
+      {
+        "key": "missing_density",
+        "message": "Specific gravity not entered – required for liquid service capacity verification."
+      }
+    ],
+    "requiredFieldsForFullCredit": [
+      "relievingCase",
+      "dischargeTo",
+      "setPressurePsig",
+      "relievingTempF",
+      "serviceType",
+      "requiredVolFlowGpm",
+      "densitySg",
+      "viscosityCp"
+    ]
+  }
+]
