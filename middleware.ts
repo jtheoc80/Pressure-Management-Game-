@@ -1,6 +1,5 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import type { NextRequest, NextFetchEvent } from "next/server";
+import type { NextRequest, NextFetchEvent, NextMiddleware } from "next/server";
 
 // Check if Clerk is configured (server-side check)
 const isClerkConfigured = () => {
@@ -15,39 +14,46 @@ const isClerkConfigured = () => {
   );
 };
 
-// Routes that require authentication
-const isProtectedRoute = createRouteMatcher([
-  "/psv-quest(.*)",
-  "/api/progress(.*)",
-  "/admin(.*)",
-]);
+// Lazily initialized Clerk middleware
+let clerkAuthMiddleware: NextMiddleware | null = null;
 
-// Routes that are always public
-const isPublicRoute = createRouteMatcher([
-  "/",
-  "/learn(.*)",
-  "/glossary(.*)",
-  "/sign-in(.*)",
-  "/sign-up(.*)",
-  "/api/psv/grade",
-]);
-
-// Create the Clerk middleware with route protection
-const authMiddleware = clerkMiddleware(async (auth, request) => {
-  // Check if route requires auth
-  if (isProtectedRoute(request) && !isPublicRoute(request)) {
-    await auth.protect();
+async function getClerkMiddleware(): Promise<NextMiddleware> {
+  if (!clerkAuthMiddleware) {
+    const { clerkMiddleware, createRouteMatcher } = await import("@clerk/nextjs/server");
+    
+    const isProtected = createRouteMatcher([
+      "/psv-quest(.*)",
+      "/api/progress(.*)",
+      "/admin(.*)",
+    ]);
+    
+    const isPublic = createRouteMatcher([
+      "/",
+      "/learn(.*)",
+      "/glossary(.*)",
+      "/sign-in(.*)",
+      "/sign-up(.*)",
+      "/api/psv/grade",
+    ]);
+    
+    clerkAuthMiddleware = clerkMiddleware(async (auth, request) => {
+      if (isProtected(request) && !isPublic(request)) {
+        await auth.protect();
+      }
+    });
   }
-});
+  return clerkAuthMiddleware;
+}
 
 // Middleware that handles both configured and unconfigured Clerk states
-export default function middleware(req: NextRequest, event: NextFetchEvent) {
+export default async function middleware(req: NextRequest, event: NextFetchEvent) {
   // If Clerk is not configured, allow all requests through
   if (!isClerkConfigured()) {
     return NextResponse.next();
   }
 
-  // Use Clerk middleware when configured
+  // Use Clerk middleware when configured (lazy load)
+  const authMiddleware = await getClerkMiddleware();
   return authMiddleware(req, event);
 }
 
