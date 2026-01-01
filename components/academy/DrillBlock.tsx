@@ -1,19 +1,38 @@
 "use client";
 
 import React, { useState } from "react";
-import { Target, CheckCircle2, XCircle, ChevronRight, RotateCcw, Lightbulb, Award } from "lucide-react";
+import { Target, CheckCircle2, XCircle, ChevronRight, RotateCcw, Lightbulb, Award, ArrowLeft } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { getDrillById, calculateDrillScore } from "@/lib/academy/drills";
+import type { Drill } from "@/lib/academy/types";
+import { getModule1DrillById, calculateModule1DrillScore, type Drill as M1Drill, type DrillQuestion as M1DrillQuestion } from "@/lib/academy/module1-drills";
 
 interface DrillBlockProps {
   drillId: string;
   onComplete?: (score: number, passed: boolean) => void;
+  onRemediation?: (stepIndex: number) => void;
 }
 
-export function DrillBlock({ drillId, onComplete }: DrillBlockProps) {
-  const drill = getDrillById(drillId);
+// Helper to get drill from either source
+function getDrill(drillId: string): Drill | M1Drill | undefined {
+  // Try Module 1 drills first (new format)
+  const m1Drill = getModule1DrillById(drillId);
+  if (m1Drill) return m1Drill;
+  
+  // Fall back to legacy drills
+  return getDrillById(drillId);
+}
+
+// Helper to check if it's a Module 1 drill
+function isModule1Drill(drill: Drill | M1Drill): drill is M1Drill {
+  const firstQuestion = drill.questions[0];
+  return 'remediationStepIndex' in firstQuestion || 'remediationLabel' in firstQuestion;
+}
+
+export function DrillBlock({ drillId, onComplete, onRemediation }: DrillBlockProps) {
+  const drill = getDrill(drillId);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<number[]>([]);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
@@ -56,7 +75,9 @@ export function DrillBlock({ drillId, onComplete }: DrillBlockProps) {
       // Drill complete
       setCompleted(true);
       const finalAnswers = [...answers, selectedAnswer!];
-      const result = calculateDrillScore(drill, finalAnswers);
+      const result = isModule1Drill(drill) 
+        ? calculateModule1DrillScore(drill, finalAnswers)
+        : calculateDrillScore(drill as Drill, finalAnswers);
       onComplete?.(result.score, result.passed);
     }
   };
@@ -71,7 +92,9 @@ export function DrillBlock({ drillId, onComplete }: DrillBlockProps) {
   };
 
   if (completed) {
-    const result = calculateDrillScore(drill, answers);
+    const result = isModule1Drill(drill) 
+      ? calculateModule1DrillScore(drill, answers)
+      : calculateDrillScore(drill as Drill, answers);
     return (
       <Card className="border-[#003366]/20">
         <CardHeader className="pb-3">
@@ -204,6 +227,19 @@ export function DrillBlock({ drillId, onComplete }: DrillBlockProps) {
               {isCorrect ? "Correct!" : "Not quite right"}
             </p>
             <p className="text-sm text-gray-700 mt-1">{question.explanation}</p>
+            
+            {/* Remediation link for wrong answers (Module 1 drills) */}
+            {!isCorrect && 'remediationStepIndex' in question && question.remediationStepIndex !== undefined && onRemediation && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="mt-2 text-amber-700 hover:text-amber-800 hover:bg-amber-100"
+                onClick={() => onRemediation(question.remediationStepIndex!)}
+              >
+                <ArrowLeft className="w-4 h-4 mr-1" />
+                {(question as M1DrillQuestion).remediationLabel || "Review this step"}
+              </Button>
+            )}
           </div>
         )}
 

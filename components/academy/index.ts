@@ -15,4 +15,10 @@ export { CaseBlock } from "./CaseBlock";
 export { LessonProgressProvider, useLessonProgress, useLessonProgressOptional } from "./LessonProgressProvider";
 export { ObjectivesRail } from "./ObjectivesRail";
 export { DiagramRenderer, validateDiagramKeys, isDiagramAvailable } from "./DiagramRenderer";
+
+// New Lesson Player components
+export { CanvasFrame } from "./CanvasFrame";
+export { StepRenderer } from "./StepRenderer";
+export { LessonPlayerLayout } from "./LessonPlayerLayout";
+
 export * from "./diagrams";
