@@ -1,8 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
-import { AlertTriangle, Lightbulb, BookOpen, CheckCircle2 } from "lucide-react";
+import { AlertTriangle, Lightbulb, BookOpen, CheckCircle2, ImageIcon } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import type { LessonSection } from "@/lib/academy/types";
 import { diagramComponents } from "./diagrams";
@@ -14,6 +14,78 @@ import { WorkedExampleLab } from "./WorkedExampleLab";
 import { DrillBlock } from "./DrillBlock";
 import { CaseBlock } from "./CaseBlock";
 import { Quiz } from "./Quiz";
+
+// Component to handle image loading with fallback
+function LessonImage({ src, alt, caption, credit }: { 
+  src: string; 
+  alt: string; 
+  caption?: string; 
+  credit?: string; 
+}) {
+  const [hasError, setHasError] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  if (hasError) {
+    // Show a styled placeholder when image fails to load
+    return (
+      <figure className="my-6">
+        <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-gray-200 bg-gray-100 flex items-center justify-center">
+          <div className="text-center p-6">
+            <ImageIcon className="w-16 h-16 text-gray-300 mx-auto mb-3" />
+            <p className="text-gray-500 text-sm">{alt}</p>
+            <p className="text-gray-400 text-xs mt-1">Training photo coming soon</p>
+          </div>
+        </div>
+        {(caption || credit) && (
+          <figcaption className="text-sm text-gray-500 text-center mt-2">
+            {caption}
+            {credit && (
+              <span className="block text-xs text-gray-400 mt-0.5">
+                {credit}
+              </span>
+            )}
+          </figcaption>
+        )}
+      </figure>
+    );
+  }
+
+  return (
+    <figure className="my-6">
+      <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-gray-200 bg-gray-100">
+        {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="animate-pulse">
+              <ImageIcon className="w-12 h-12 text-gray-300" />
+            </div>
+          </div>
+        )}
+        <Image
+          src={src}
+          alt={alt}
+          fill
+          className={`object-cover transition-opacity duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'}`}
+          sizes="(max-width: 768px) 100vw, 800px"
+          onLoad={() => setIsLoading(false)}
+          onError={() => {
+            setIsLoading(false);
+            setHasError(true);
+          }}
+        />
+      </div>
+      {(caption || credit) && (
+        <figcaption className="text-sm text-gray-500 text-center mt-2">
+          {caption}
+          {credit && (
+            <span className="block text-xs text-gray-400 mt-0.5">
+              {credit}
+            </span>
+          )}
+        </figcaption>
+      )}
+    </figure>
+  );
+}
 
 interface LessonRendererProps {
   sections: LessonSection[];
@@ -134,31 +206,13 @@ export function LessonRenderer({ sections, onQuizComplete, onDrillComplete }: Le
 
       case "image":
         return (
-          <figure key={index} className="my-6">
-            <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-gray-200">
-              <Image
-                src={section.src}
-                alt={section.alt}
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, 800px"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.src = "/academy/photos/placeholder.svg";
-                }}
-              />
-            </div>
-            {(section.caption || section.credit) && (
-              <figcaption className="text-sm text-gray-500 text-center mt-2">
-                {section.caption}
-                {section.credit && (
-                  <span className="block text-xs text-gray-400 mt-0.5">
-                    {section.credit}
-                  </span>
-                )}
-              </figcaption>
-            )}
-          </figure>
+          <LessonImage
+            key={index}
+            src={section.src}
+            alt={section.alt}
+            caption={section.caption}
+            credit={section.credit}
+          />
         );
 
       case "gallery":

@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { X } from "lucide-react";
+import { X, ImageIcon } from "lucide-react";
 import type { Hotspot } from "@/lib/academy/types";
 
 interface HotspotImageProps {
@@ -14,6 +14,7 @@ interface HotspotImageProps {
 export function HotspotImage({ imageSrc, imageAlt, hotspots }: HotspotImageProps) {
   const [activeHotspot, setActiveHotspot] = useState<number | null>(null);
   const [completedHotspots, setCompletedHotspots] = useState<Set<number>>(new Set());
+  const [imageError, setImageError] = useState(false);
 
   const handleHotspotClick = (index: number) => {
     setActiveHotspot(activeHotspot === index ? null : index);
@@ -25,17 +26,24 @@ export function HotspotImage({ imageSrc, imageAlt, hotspots }: HotspotImageProps
   return (
     <div className="space-y-4">
       <div className="relative w-full aspect-video bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
-        <Image
-          src={imageSrc}
-          alt={imageAlt}
-          fill
-          className="object-contain"
-          sizes="(max-width: 768px) 100vw, 800px"
-          onError={(e) => {
-            const target = e.target as HTMLImageElement;
-            target.src = "/academy/photos/placeholder.svg";
-          }}
-        />
+        {imageError ? (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="text-center p-6">
+              <ImageIcon className="w-16 h-16 text-gray-300 mx-auto mb-3" />
+              <p className="text-gray-500 text-sm">{imageAlt}</p>
+              <p className="text-gray-400 text-xs mt-1">Interactive image coming soon</p>
+            </div>
+          </div>
+        ) : (
+          <Image
+            src={imageSrc}
+            alt={imageAlt}
+            fill
+            className="object-contain"
+            sizes="(max-width: 768px) 100vw, 800px"
+            onError={() => setImageError(true)}
+          />
+        )}
 
         {/* Hotspot markers */}
         {hotspots.map((hotspot, index) => (
