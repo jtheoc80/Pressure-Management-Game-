@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
+import { useEffect, useState, use, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSafeUser } from "@/lib/auth";
@@ -11,10 +11,13 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, Clock, Target, CheckCircle2 } from "lucide-react";
 import { LessonRenderer } from "@/components/academy/LessonRenderer";
+import { LessonProgressProvider } from "@/components/academy/LessonProgressProvider";
+import { ObjectivesRail } from "@/components/academy/ObjectivesRail";
 import { getLessonById, getLessonsByTrack, getNextLesson } from "@/lib/academy/lessons";
 import { getDrillByLessonId } from "@/lib/academy/drills";
 import { glossaryTerms } from "@/lib/academy/glossary";
-import type { Lesson, LessonSection, UserProgress } from "@/lib/academy/types";
+import type { Lesson, UserProgress, LessonObjective } from "@/lib/academy/types";
+import { normalizeObjectives as normalizeObjectivesFn } from "@/lib/academy/types";
 
 interface PageProps {
   params: Promise<{ lessonId: string }>;
@@ -73,6 +76,13 @@ export default function LessonPage({ params }: PageProps) {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Normalize objectives to enhanced format for progress tracking
+  // Must be called before any early returns to follow hooks rules
+  const enhancedObjectives = useMemo((): LessonObjective[] => {
+    if (!lesson) return [];
+    return normalizeObjectivesFn(lesson.objectives, lesson.id);
+  }, [lesson]);
 
   if (!lesson) {
     return (
@@ -205,56 +215,61 @@ export default function LessonPage({ params }: PageProps) {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Left Sidebar - Objectives */}
-          <div className="lg:col-span-3 order-2 lg:order-1">
-            <Card className="border-slate-200 sticky top-24">
-              <CardContent className="p-4">
-                <h3 className="font-semibold text-sm text-slate-700 mb-3 flex items-center gap-2">
-                  <Target className="w-4 h-4 text-[#003366]" />
-                  Learning Objectives
-                </h3>
-                <ul className="space-y-2">
-                  {lesson.objectives.map((obj, idx) => (
-                    <li key={idx} className="flex items-start gap-2 text-xs text-slate-600">
-                      <span className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center shrink-0 text-slate-500 font-medium">
-                        {idx + 1}
-                      </span>
-                      <span>{obj}</span>
-                    </li>
-                  ))}
-                </ul>
+        <LessonProgressProvider lessonId={lessonId} objectives={enhancedObjectives}>
+          {/* Objectives Rail - Horizontal progress across the page */}
+          <ObjectivesRail objectives={enhancedObjectives} />
+          
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* Left Sidebar - Objectives */}
+            <div className="lg:col-span-3 order-2 lg:order-1">
+              <Card className="border-slate-200 sticky top-24">
+                <CardContent className="p-4">
+                  <h3 className="font-semibold text-sm text-slate-700 mb-3 flex items-center gap-2">
+                    <Target className="w-4 h-4 text-[#003366]" />
+                    Learning Objectives
+                  </h3>
+                  <ul className="space-y-2">
+                    {enhancedObjectives.map((obj, idx) => (
+                      <li key={obj.id} className="flex items-start gap-2 text-xs text-slate-600">
+                        <span className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center shrink-0 text-slate-500 font-medium">
+                          {idx + 1}
+                        </span>
+                        <span>{obj.text}</span>
+                      </li>
+                    ))}
+                  </ul>
 
-                <Separator className="my-4" />
+                  <Separator className="my-4" />
 
-                {/* Quick Stats */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-slate-500">Sections</span>
-                    <span className="font-medium text-slate-700">{lesson.sections.length}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-slate-500">Estimated Time</span>
-                    <span className="font-medium text-slate-700">{lesson.estMinutes} min</span>
-                  </div>
-                  {lessonProgress?.bestScore !== undefined && lessonProgress.bestScore > 0 && (
+                  {/* Quick Stats */}
+                  <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-slate-500">Best Quiz Score</span>
-                      <span className="font-medium text-emerald-600">{lessonProgress.bestScore}%</span>
+                      <span className="text-slate-500">Sections</span>
+                      <span className="font-medium text-slate-700">{lesson.sections.length}</span>
                     </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-slate-500">Estimated Time</span>
+                      <span className="font-medium text-slate-700">{lesson.estMinutes} min</span>
+                    </div>
+                    {lessonProgress?.bestScore !== undefined && lessonProgress.bestScore > 0 && (
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-slate-500">Best Quiz Score</span>
+                        <span className="font-medium text-emerald-600">{lessonProgress.bestScore}%</span>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
 
-          {/* Main Content */}
-          <div className="lg:col-span-6 order-1 lg:order-2">
-            <LessonRenderer
-              sections={lesson.sections}
-              onQuizComplete={handleQuizComplete}
-              onDrillComplete={handleDrillComplete}
-            />
+            {/* Main Content */}
+            <div className="lg:col-span-6 order-1 lg:order-2">
+              <LessonRenderer
+                sections={lesson.sections}
+                lessonId={lessonId}
+                onQuizComplete={handleQuizComplete}
+                onDrillComplete={handleDrillComplete}
+              />
 
             {/* Navigation */}
             <div className="flex items-center justify-between mt-8 pt-6 border-t border-slate-200">
@@ -315,6 +330,7 @@ export default function LessonPage({ params }: PageProps) {
             </Card>
           </div>
         </div>
+        </LessonProgressProvider>
       </main>
     </div>
   );

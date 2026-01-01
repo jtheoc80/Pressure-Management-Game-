@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { BookOpen, ExternalLink, ChevronDown, ChevronUp, Copy, Check } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,11 +11,14 @@ interface RuleCardProps {
   quote?: string;
   sourceLabel: string;
   sourceUrl?: string;
+  /** Callback when the quote is expanded */
+  onExpand?: () => void;
 }
 
-export function RuleCard({ title, body, quote, sourceLabel, sourceUrl }: RuleCardProps) {
+export function RuleCard({ title, body, quote, sourceLabel, sourceUrl, onExpand }: RuleCardProps) {
   const [expanded, setExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [hasExpanded, setHasExpanded] = useState(false);
 
   const handleCopy = async () => {
     const text = `${title}\n\n${body}${quote ? `\n\n"${quote}"` : ""}\n\nSource: ${sourceLabel}${sourceUrl ? ` (${sourceUrl})` : ""}`;
@@ -23,6 +26,17 @@ export function RuleCard({ title, body, quote, sourceLabel, sourceUrl }: RuleCar
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
+
+  const handleToggleExpand = useCallback(() => {
+    const newExpanded = !expanded;
+    setExpanded(newExpanded);
+    
+    // Track first expansion only
+    if (newExpanded && !hasExpanded) {
+      setHasExpanded(true);
+      onExpand?.();
+    }
+  }, [expanded, hasExpanded, onExpand]);
 
   return (
     <Card className="border-l-4 border-l-[#003366] bg-slate-50">
@@ -38,7 +52,7 @@ export function RuleCard({ title, body, quote, sourceLabel, sourceUrl }: RuleCar
               
               {quote && (
                 <button
-                  onClick={() => setExpanded(!expanded)}
+                  onClick={handleToggleExpand}
                   className="flex items-center gap-1 text-sm text-[#003366] mt-2 hover:underline"
                 >
                   {expanded ? (
