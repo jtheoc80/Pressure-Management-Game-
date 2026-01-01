@@ -30,27 +30,11 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const body = (
-    <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-      {children}
-    </body>
-  );
-
-  // Only wrap with ClerkProvider if properly configured
-  if (isClerkConfigured()) {
-    return (
-      <ClerkProvider>
-        <html lang="en">
-          {body}
-        </html>
-      </ClerkProvider>
-    );
-  }
-
-  // Fallback without Clerk for development/build without credentials
   return (
     <html lang="en">
-      {body}
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        {isClerkConfigured() ? <ClerkProvider>{children}</ClerkProvider> : children}
+      </body>
     </html>
   );
 }
