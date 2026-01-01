@@ -14,31 +14,50 @@ This folder contains photos for the Training Academy lessons, case studies, and 
 ```
 photos/
 ├── psv/           # Pressure Safety Valve equipment
-│   ├── conventional-valve-installed.jpg
-│   ├── bellows-valve-cutaway.jpg
-│   ├── pilot-operated-valve.jpg
-│   ├── steam-service-psv.jpg
-│   └── thermal-relief-valve.jpg
+│   ├── conventional-installed.jpg
+│   ├── bellows-cutaway.jpg
+│   ├── pilot-operated.jpg
+│   ├── nameplate-set-pressure.jpg
+│   └── steam-service-psv.jpg
 │
 ├── tank/          # Tank equipment (PVRVs, vents, arresters)
-│   ├── pvrv-on-tank.jpg
-│   ├── floating-roof.jpg
-│   ├── flame-arrester.jpg
-│   ├── arrester-element.jpg
+│   ├── pvrv-roof.jpg
 │   ├── emergency-vent.jpg
-│   ├── gauge-hatch.jpg
-│   ├── radar-level-switch.jpg
-│   ├── tank-farm-aerial.jpg
+│   ├── flame-arrester.jpg
+│   ├── radar-gauge.jpg
 │   └── vapor-recovery-unit.jpg
 │
 └── field/         # Field installations and general equipment
-    ├── control-valve-positioner.jpg
+    ├── gauge-compound.jpg
     ├── flare-header.jpg
     ├── heat-exchanger.jpg
-    ├── steam-header.jpg
-    ├── offshore-separator.jpg
-    └── marine-loading-arm.jpg
+    └── loading-rack-vapor.jpg
 ```
+
+## MODULE 1 SHOT LIST (Priority)
+
+### Lesson 2: Pressure & Temperature Units
+| File Path | Shot Description |
+|-----------|------------------|
+| `field/gauge-compound.jpg` | Close-up of a compound pressure gauge dial showing the 0 psig reference point and vacuum scale |
+| `psv/nameplate-set-pressure.jpg` | Close-up of PSV nameplate with set pressure clearly visible (e.g., "SET: 150 PSIG") |
+
+### Lesson 5: Valve Styles
+| File Path | Shot Description |
+|-----------|------------------|
+| `psv/conventional-installed.jpg` | Full shot of a conventional PSV mounted on a vessel nozzle, showing bonnet, test lever, and discharge elbow |
+| `psv/bellows-cutaway.jpg` | Cutaway or sectioned bellows valve showing the bellows element wrapped around the disc guide |
+| `psv/pilot-operated.jpg` | Full shot of pilot-operated valve showing the main body and the small pilot valve mounted on top |
+
+### Lesson 6: Tank Protection
+| File Path | Shot Description |
+|-----------|------------------|
+| `tank/pvrv-roof.jpg` | PVRV installed on a tank roof, showing pressure and vacuum pallets |
+| `tank/emergency-vent.jpg` | Emergency vent device on tank roof, showing the larger opening compared to normal PVRV |
+| `tank/flame-arrester.jpg` | Flame arrester installed between PVRV and tank nozzle, showing the element housing |
+| `tank/radar-gauge.jpg` | Radar gauge head mounted on tank roof with stilling well connection |
+
+---
 
 ## Required Images for MVP
 
