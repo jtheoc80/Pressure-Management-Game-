@@ -133,21 +133,13 @@ export function Quiz({ quiz, onComplete, bestScore }: QuizProps) {
             })}
           </div>
 
-          <div className="flex gap-3 pt-4">
-            {!passed && (
-              <Button onClick={handleRetry} variant="outline" className="flex-1">
+          {!passed && (
+            <div className="pt-4">
+              <Button onClick={handleRetry} variant="outline" className="w-full">
                 Try Again
               </Button>
-            )}
-            {passed && (
-              <Button 
-                onClick={() => onComplete(score, true)} 
-                className="flex-1 bg-emerald-600 hover:bg-emerald-700"
-              >
-                Continue to Next Lesson
-              </Button>
-            )}
-          </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     );
