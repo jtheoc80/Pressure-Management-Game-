@@ -12,4 +12,7 @@ export { RuleCard } from "./RuleCard";
 export { WorkedExampleLab } from "./WorkedExampleLab";
 export { DrillBlock } from "./DrillBlock";
 export { CaseBlock } from "./CaseBlock";
+export { LessonProgressProvider, useLessonProgress, useLessonProgressOptional } from "./LessonProgressProvider";
+export { ObjectivesRail } from "./ObjectivesRail";
+export { DiagramRenderer, validateDiagramKeys, isDiagramAvailable } from "./DiagramRenderer";
 export * from "./diagrams";

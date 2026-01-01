@@ -1,12 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import Image from "next/image";
 import { AlertTriangle, Lightbulb, BookOpen, CheckCircle2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import type { LessonSection } from "@/lib/academy/types";
-import { diagramComponents } from "./diagrams";
-import { diagramRegistry } from "@/lib/academy/diagramRegistry";
 import { ImageGallery } from "./ImageGallery";
 import { HotspotImage } from "./HotspotImage";
 import { RuleCard } from "./RuleCard";
@@ -14,57 +12,88 @@ import { WorkedExampleLab } from "./WorkedExampleLab";
 import { DrillBlock } from "./DrillBlock";
 import { CaseBlock } from "./CaseBlock";
 import { Quiz } from "./Quiz";
+import { DiagramRenderer } from "./DiagramRenderer";
+import { useLessonProgressOptional } from "./LessonProgressProvider";
 
 interface LessonRendererProps {
   sections: LessonSection[];
+  lessonId?: string;
   onQuizComplete?: (score: number, passed: boolean) => void;
   onDrillComplete?: (drillId: string, score: number, passed: boolean) => void;
 }
 
-export function LessonRenderer({ sections, onQuizComplete, onDrillComplete }: LessonRendererProps) {
+/**
+ * SectionWrapper - Wraps each section with an anchor and IntersectionObserver
+ */
+function SectionWrapper({
+  children,
+  index,
+}: {
+  children: React.ReactNode;
+  index: number;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const progress = useLessonProgressOptional();
+  const hasViewed = useRef(false);
+
+  useEffect(() => {
+    if (!ref.current || hasViewed.current) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (entry.isIntersecting && !hasViewed.current) {
+          hasViewed.current = true;
+          progress?.markCheckpoint(`viewed:section:${index}`);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.3 } // 30% visibility triggers checkpoint
+    );
+
+    observer.observe(ref.current);
+
+    return () => observer.disconnect();
+  }, [index, progress]);
+
+  return (
+    <div ref={ref} id={`section-${index}`} className="scroll-mt-24">
+      {children}
+    </div>
+  );
+}
+
+export function LessonRenderer({ sections, lessonId, onQuizComplete, onDrillComplete }: LessonRendererProps) {
+  const progress = useLessonProgressOptional();
+
   const renderSection = (section: LessonSection, index: number) => {
     switch (section.type) {
       case "text":
         return (
-          <div key={index} className="prose prose-slate max-w-none">
-            {section.heading && (
-              <h3 className="text-xl font-semibold text-[#003366] mt-8 mb-4">
-                {section.heading}
-              </h3>
-            )}
-            {section.body.split("\n\n").map((paragraph, pIdx) => (
-              <p key={pIdx} className="text-gray-700 leading-relaxed">
-                {paragraph}
-              </p>
-            ))}
-          </div>
+          <SectionWrapper key={index} index={index}>
+            <div className="prose prose-slate max-w-none">
+              {section.heading && (
+                <h3 className="text-xl font-semibold text-[#003366] mt-8 mb-4">
+                  {section.heading}
+                </h3>
+              )}
+              {section.body.split("\n\n").map((paragraph, pIdx) => (
+                <p key={pIdx} className="text-gray-700 leading-relaxed">
+                  {paragraph}
+                </p>
+              ))}
+            </div>
+          </SectionWrapper>
         );
 
       case "diagram":
-        // Check both old diagramComponents and new diagramRegistry
-        const DiagramComponent = 
-          diagramComponents[section.key as keyof typeof diagramComponents] ||
-          diagramRegistry[section.key];
-        if (!DiagramComponent) {
-          return (
-            <Card key={index} className="border-amber-200 bg-amber-50">
-              <CardContent className="p-4">
-                <p className="text-amber-700">Diagram not found: {section.key}</p>
-              </CardContent>
-            </Card>
-          );
-        }
         return (
-          <div key={index} className="my-6">
-            <div className="bg-white rounded-lg border border-gray-200 p-4 overflow-hidden">
-              <DiagramComponent />
-            </div>
-            {section.caption && (
-              <p className="text-sm text-gray-500 text-center mt-2 italic">
-                {section.caption}
-              </p>
-            )}
-          </div>
+          <SectionWrapper key={index} index={index}>
+            <DiagramRenderer
+              diagramKey={section.key}
+              caption={section.caption}
+            />
+          </SectionWrapper>
         );
 
       case "callout":
@@ -93,142 +122,169 @@ export function LessonRenderer({ sections, onQuizComplete, onDrillComplete }: Le
         };
         const style = calloutStyles[section.variant];
         return (
-          <div
-            key={index}
-            className={`${style.bg} ${style.border} border rounded-lg p-4 my-6`}
-          >
-            <div className="flex items-start gap-3">
-              <div className="shrink-0 mt-0.5">{style.icon}</div>
-              <div>
-                <p className={`font-medium ${style.textColor}`}>{style.title}</p>
-                <p className={`text-sm ${style.textColor} mt-1`}>{section.body}</p>
+          <SectionWrapper key={index} index={index}>
+            <div
+              className={`${style.bg} ${style.border} border rounded-lg p-4 my-6`}
+            >
+              <div className="flex items-start gap-3">
+                <div className="shrink-0 mt-0.5">{style.icon}</div>
+                <div>
+                  <p className={`font-medium ${style.textColor}`}>{style.title}</p>
+                  <p className={`text-sm ${style.textColor} mt-1`}>{section.body}</p>
+                </div>
               </div>
             </div>
-          </div>
+          </SectionWrapper>
         );
 
       case "check":
         return (
-          <div key={index} className="bg-slate-50 rounded-lg p-4 my-6">
-            <h4 className="font-medium text-[#003366] mb-3 flex items-center gap-2">
-              <CheckCircle2 className="w-5 h-5" />
-              What Good Looks Like
-            </h4>
-            <ul className="space-y-2">
-              {section.items.map((item, itemIdx) => (
-                <li key={itemIdx} className="flex items-start gap-2">
-                  <span className="text-emerald-500 mt-1">✓</span>
-                  <span className="text-gray-700">{item}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
+          <SectionWrapper key={index} index={index}>
+            <div className="bg-slate-50 rounded-lg p-4 my-6">
+              <h4 className="font-medium text-[#003366] mb-3 flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5" />
+                What Good Looks Like
+              </h4>
+              <ul className="space-y-2">
+                {section.items.map((item, itemIdx) => (
+                  <li key={itemIdx} className="flex items-start gap-2">
+                    <span className="text-emerald-500 mt-1">✓</span>
+                    <span className="text-gray-700">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </SectionWrapper>
         );
 
       case "quiz":
         return (
-          <div key={index} className="my-6">
-            <Quiz quizId={section.quizId} onComplete={onQuizComplete} />
-          </div>
+          <SectionWrapper key={index} index={index}>
+            <div className="my-6">
+              <Quiz quizId={section.quizId} onComplete={onQuizComplete} />
+            </div>
+          </SectionWrapper>
         );
 
       case "image":
         return (
-          <figure key={index} className="my-6">
-            <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-gray-200">
-              <Image
-                src={section.src}
-                alt={section.alt}
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, 800px"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.src = "/academy/photos/placeholder.svg";
-                }}
-              />
-            </div>
-            {(section.caption || section.credit) && (
-              <figcaption className="text-sm text-gray-500 text-center mt-2">
-                {section.caption}
-                {section.credit && (
-                  <span className="block text-xs text-gray-400 mt-0.5">
-                    {section.credit}
-                  </span>
-                )}
-              </figcaption>
-            )}
-          </figure>
+          <SectionWrapper key={index} index={index}>
+            <figure className="my-6">
+              <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-gray-200">
+                <Image
+                  src={section.src}
+                  alt={section.alt}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 800px"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = "/academy/photos/placeholder.svg";
+                  }}
+                />
+              </div>
+              {(section.caption || section.credit) && (
+                <figcaption className="text-sm text-gray-500 text-center mt-2">
+                  {section.caption}
+                  {section.credit && (
+                    <span className="block text-xs text-gray-400 mt-0.5">
+                      {section.credit}
+                    </span>
+                  )}
+                </figcaption>
+              )}
+            </figure>
+          </SectionWrapper>
         );
 
       case "gallery":
         return (
-          <div key={index} className="my-6">
-            <ImageGallery images={section.images} />
-          </div>
+          <SectionWrapper key={index} index={index}>
+            <div className="my-6">
+              <ImageGallery images={section.images} />
+            </div>
+          </SectionWrapper>
         );
 
       case "hotspot":
         return (
-          <div key={index} className="my-6">
-            <HotspotImage
-              imageSrc={section.imageSrc}
-              imageAlt={section.imageAlt}
-              hotspots={section.hotspots}
-            />
-          </div>
+          <SectionWrapper key={index} index={index}>
+            <div className="my-6">
+              <HotspotImage
+                imageSrc={section.imageSrc}
+                imageAlt={section.imageAlt}
+                hotspots={section.hotspots}
+                onHotspotExplore={(hotspotIdx) => {
+                  progress?.markCheckpoint(`hotspot:${lessonId}:${index}:${hotspotIdx}`);
+                }}
+              />
+            </div>
+          </SectionWrapper>
         );
 
       case "case":
         return (
-          <div key={index} className="my-6">
-            <CaseBlock caseId={section.caseId} compact />
-          </div>
+          <SectionWrapper key={index} index={index}>
+            <div className="my-6">
+              <CaseBlock caseId={section.caseId} compact />
+            </div>
+          </SectionWrapper>
         );
 
       case "rule":
         return (
-          <div key={index} className="my-6">
-            <RuleCard
-              title={section.title}
-              body={section.body}
-              quote={section.quote}
-              sourceLabel={section.sourceLabel}
-              sourceUrl={section.sourceUrl}
-            />
-          </div>
+          <SectionWrapper key={index} index={index}>
+            <div className="my-6">
+              <RuleCard
+                title={section.title}
+                body={section.body}
+                quote={section.quote}
+                sourceLabel={section.sourceLabel}
+                sourceUrl={section.sourceUrl}
+                onExpand={() => {
+                  progress?.markCheckpoint(`opened:rule:${index}`);
+                }}
+              />
+            </div>
+          </SectionWrapper>
         );
 
       case "worked":
         return (
-          <div key={index} className="my-6">
-            <WorkedExampleLab
-              title={section.title}
-              prompt={section.prompt}
-              fields={section.fields}
-              check={section.check}
-              explanation={section.explanation}
-            />
-          </div>
+          <SectionWrapper key={index} index={index}>
+            <div className="my-6">
+              <WorkedExampleLab
+                title={section.title}
+                prompt={section.prompt}
+                fields={section.fields}
+                check={section.check}
+                explanation={section.explanation}
+              />
+            </div>
+          </SectionWrapper>
         );
 
       case "drill":
         return (
-          <div key={index} className="my-6">
-            <DrillBlock
-              drillId={section.drillId}
-              onComplete={(score, passed) => onDrillComplete?.(section.drillId, score, passed)}
-            />
-          </div>
+          <SectionWrapper key={index} index={index}>
+            <div className="my-6">
+              <DrillBlock
+                drillId={section.drillId}
+                onComplete={(score, passed) => onDrillComplete?.(section.drillId, score, passed)}
+              />
+            </div>
+          </SectionWrapper>
         );
 
       default:
         return (
-          <Card key={index} className="border-gray-200 bg-gray-50 my-6">
-            <CardContent className="p-4">
-              <p className="text-gray-500">Unknown section type</p>
-            </CardContent>
-          </Card>
+          <SectionWrapper key={index} index={index}>
+            <Card className="border-gray-200 bg-gray-50 my-6">
+              <CardContent className="p-4">
+                <p className="text-gray-500">Unknown section type</p>
+              </CardContent>
+            </Card>
+          </SectionWrapper>
         );
     }
   };

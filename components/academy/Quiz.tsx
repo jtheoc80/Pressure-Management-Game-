@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -8,7 +8,15 @@ import { Badge } from "@/components/ui/badge";
 import { Target, RotateCcw, Focus, BookOpen } from "lucide-react";
 import { getQuizById } from "@/lib/academy/quizzes";
 import { getLessonById } from "@/lib/academy/lessons";
-import type { Quiz as QuizType, QuizQuestion } from "@/lib/academy/types";
+import type { Quiz as QuizType, QuizQuestion, LessonObjective } from "@/lib/academy/types";
+
+/** Helper to get objective text (handles both string and LessonObjective) */
+function getObjectiveText(objective: string | LessonObjective): string {
+  if (typeof objective === 'string') {
+    return objective;
+  }
+  return objective.text;
+}
 
 interface QuizProps {
   quizId?: string;
@@ -193,7 +201,7 @@ export function Quiz({ quizId, quiz: quizProp, onComplete, bestScore, drillCompl
                 {previousWeakObjectives.map((objIdx) => (
                   <li key={objIdx} className="flex items-start gap-2">
                     <span className="text-blue-400">•</span>
-                    {lesson.objectives[objIdx]}
+                    {getObjectiveText(lesson.objectives[objIdx])}
                   </li>
                 ))}
               </ul>
