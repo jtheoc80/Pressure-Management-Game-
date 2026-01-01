@@ -27,11 +27,9 @@ export const lessons: Lesson[] = [
         body: "Pressure relief is a safety function that prevents equipment from exceeding its maximum allowable working pressure (MAWP). When process conditions cause pressure to rise beyond safe limits, relief devices open automatically to vent excess pressure and protect equipment, personnel, and the environment.\n\nThink of a PSV as your equipment's safety net – it's the last line of defense before catastrophic failure.",
       },
       {
-        type: "image",
-        src: "/academy/photos/psv/conventional-valve-installed.jpg",
-        alt: "Conventional PSV installed on a process vessel",
-        caption: "A conventional PSV installed on a refinery vessel, protecting against overpressure",
-        credit: "Training photo",
+        type: "diagram",
+        key: "PressureBasicsDiagram",
+        caption: "Relationship between operating pressure, set pressure, and MAWP",
       },
       {
         type: "callout",
@@ -57,14 +55,14 @@ export const lessons: Lesson[] = [
       },
       {
         type: "hotspot",
-        imageSrc: "/academy/photos/psv/conventional-valve-installed.jpg",
+        imageSrc: "/academy/photos/psv/conventional-valve-diagram.svg",
         imageAlt: "PSV with labeled components",
         hotspots: [
           { xPct: 50, yPct: 15, label: "Cap/Bonnet", body: "Protects the spring and adjustment mechanism. Contains the set pressure adjustment." },
-          { xPct: 50, yPct: 40, label: "Spring Chamber", body: "Houses the spring that determines set pressure. The spring force keeps the disc sealed until inlet pressure overcomes it." },
-          { xPct: 30, yPct: 65, label: "Inlet", body: "Connected to the protected equipment. Sees system pressure at all times." },
-          { xPct: 70, yPct: 65, label: "Outlet", body: "Discharge path for relieving fluid. Routes to atmosphere, flare, or closed system." },
-          { xPct: 50, yPct: 80, label: "Body", body: "Main pressure-containing structure. Rated for full inlet pressure." },
+          { xPct: 50, yPct: 35, label: "Spring Chamber", body: "Houses the spring that determines set pressure. The spring force keeps the disc sealed until inlet pressure overcomes it." },
+          { xPct: 32, yPct: 64, label: "Inlet", body: "Connected to the protected equipment. Sees system pressure at all times." },
+          { xPct: 80, yPct: 64, label: "Outlet", body: "Discharge path for relieving fluid. Routes to atmosphere, flare, or closed system." },
+          { xPct: 50, yPct: 76, label: "Body", body: "Main pressure-containing structure. Rated for full inlet pressure." },
         ],
       },
       {
@@ -151,11 +149,9 @@ export const lessons: Lesson[] = [
         body: "For a vessel with 100 psig MAWP:\n• Set pressure = 100 psig (at MAWP)\n• With 10% accumulation, max pressure during relief = 110 psig\n• Relieving pressure (for sizing) = 110 psig = 124.7 psia",
       },
       {
-        type: "image",
-        src: "/academy/photos/psv/bellows-valve-cutaway.jpg",
-        alt: "Bellows PSV cutaway showing internal components",
-        caption: "Cutaway of a balanced bellows PSV showing the bellows assembly",
-        credit: "Training photo",
+        type: "diagram",
+        key: "PSVStyleCutaways",
+        caption: "Cutaway comparison of PSV types showing the bellows assembly in balanced valves",
       },
       {
         type: "text",
@@ -913,10 +909,10 @@ export const lessons: Lesson[] = [
       },
       {
         type: "image",
-        src: "/academy/photos/tank/pvrv-on-tank.jpg",
+        src: "/academy/photos/tank/pvrv-diagram.svg",
         alt: "PVRV mounted on storage tank roof",
         caption: "A pressure/vacuum relief valve (PVRV) installed on a tank roof nozzle",
-        credit: "Training photo",
+        credit: "Technical diagram",
       },
       {
         type: "diagram",

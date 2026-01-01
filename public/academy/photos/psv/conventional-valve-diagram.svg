@@ -1,0 +1,73 @@
+<svg viewBox="0 0 400 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="400" height="500" fill="#F8FAFC"/>
+  
+  <!-- Title -->
+  <text x="200" y="30" text-anchor="middle" fill="#003366" font-family="system-ui, sans-serif" font-size="16" font-weight="600">Conventional PSV Components</text>
+  
+  <!-- Valve body outline - main body -->
+  <rect x="120" y="250" width="160" height="160" fill="#E2E8F0" stroke="#003366" stroke-width="3" rx="8"/>
+  
+  <!-- Bonnet/Cap area -->
+  <rect x="150" y="50" width="100" height="50" fill="#F1F5F9" stroke="#003366" stroke-width="3" rx="4"/>
+  <text x="200" y="82" text-anchor="middle" fill="#003366" font-family="system-ui, sans-serif" font-size="12" font-weight="500">ADJUSTMENT</text>
+  
+  <!-- Spring housing -->
+  <rect x="145" y="100" width="110" height="150" fill="#FFFFFF" stroke="#003366" stroke-width="3" rx="4"/>
+  
+  <!-- Spring coils -->
+  <path d="M 165 120 L 235 120" stroke="#003366" stroke-width="3" fill="none"/>
+  <path d="M 165 140 L 235 140" stroke="#003366" stroke-width="3" fill="none"/>
+  <path d="M 165 160 L 235 160" stroke="#003366" stroke-width="3" fill="none"/>
+  <path d="M 165 180 L 235 180" stroke="#003366" stroke-width="3" fill="none"/>
+  <path d="M 165 200 L 235 200" stroke="#003366" stroke-width="3" fill="none"/>
+  <path d="M 165 220 L 235 220" stroke="#003366" stroke-width="3" fill="none"/>
+  
+  <!-- Stem -->
+  <rect x="185" y="220" width="30" height="50" fill="#94A3B8" stroke="#003366" stroke-width="2"/>
+  
+  <!-- Disc/Seat -->
+  <ellipse cx="200" cy="280" rx="50" ry="15" fill="#1E3A5F" stroke="#003366" stroke-width="2"/>
+  
+  <!-- Inlet nozzle (bottom) -->
+  <rect x="160" y="410" width="80" height="60" fill="#E2E8F0" stroke="#003366" stroke-width="3" rx="4"/>
+  <text x="200" y="448" text-anchor="middle" fill="#003366" font-family="system-ui, sans-serif" font-size="14" font-weight="600">INLET</text>
+  
+  <!-- Flow passage up to disc -->
+  <rect x="175" y="330" width="50" height="80" fill="#F1F5F9" stroke="#003366" stroke-width="2"/>
+  
+  <!-- Outlet nozzle (side) -->
+  <rect x="280" y="290" width="80" height="60" fill="#E2E8F0" stroke="#003366" stroke-width="3" rx="4"/>
+  <text x="320" y="328" text-anchor="middle" fill="#003366" font-family="system-ui, sans-serif" font-size="14" font-weight="600">OUTLET</text>
+  
+  <!-- Flow passage to outlet -->
+  <rect x="250" y="300" width="30" height="40" fill="#F1F5F9" stroke="#003366" stroke-width="2"/>
+  
+  <!-- Pressure arrows (inlet) -->
+  <path d="M 200 480 L 200 460" stroke="#10B981" stroke-width="3" marker-end="url(#arrowGreen)"/>
+  <path d="M 180 480 L 180 460" stroke="#10B981" stroke-width="3"/>
+  <path d="M 220 480 L 220 460" stroke="#10B981" stroke-width="3"/>
+  
+  <!-- Arrow marker definitions -->
+  <defs>
+    <marker id="arrowGreen" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#10B981"/>
+    </marker>
+  </defs>
+  
+  <!-- Component labels with lines -->
+  <!-- Label 1: Cap/Bonnet -->
+  <circle cx="200" cy="75" r="4" fill="#003366"/>
+  
+  <!-- Label 2: Spring Chamber -->
+  <circle cx="200" cy="175" r="4" fill="#003366"/>
+  
+  <!-- Label 3: Inlet -->
+  <circle cx="130" cy="320" r="4" fill="#003366"/>
+  
+  <!-- Label 4: Outlet -->
+  <circle cx="320" cy="320" r="4" fill="#003366"/>
+  
+  <!-- Label 5: Body -->
+  <circle cx="200" cy="380" r="4" fill="#003366"/>
+</svg>
