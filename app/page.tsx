@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { SignInButton, UserButton } from "@clerk/nextjs";
-import { useSafeUser } from "@/lib/auth";
+import { isClerkConfigured, useSafeUser } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { HeroVisualCard, ProofBar, GuidedPath, Outcomes } from "@/components/landing";
@@ -14,6 +14,7 @@ import type { UserProgress } from "@/lib/academy/types";
 export default function Home() {
   const { isSignedIn, isLoaded: clerkLoaded } = useSafeUser();
   const [academyProgress, setAcademyProgress] = useState<UserProgress | null>(null);
+  const clerkConfigured = isClerkConfigured();
 
   useEffect(() => {
     const loadData = async () => {
@@ -86,7 +87,7 @@ export default function Home() {
           {/* Right: Auth */}
           <div className="flex items-center gap-3">
             {clerkLoaded && (
-              isSignedIn ? (
+              isSignedIn && clerkConfigured ? (
                 <div className="flex items-center gap-3">
                   <Link href="/learn">
                     <Button 
@@ -107,11 +108,19 @@ export default function Home() {
                   />
                 </div>
               ) : (
-                <SignInButton mode="modal">
-                  <Button size="sm" className="bg-teal-600 hover:bg-teal-700 text-white">
-                    Sign In
-                  </Button>
-                </SignInButton>
+                clerkConfigured ? (
+                  <SignInButton mode="modal">
+                    <Button size="sm" className="bg-teal-600 hover:bg-teal-700 text-white">
+                      Sign In
+                    </Button>
+                  </SignInButton>
+                ) : (
+                  <Link href="/sign-in">
+                    <Button size="sm" className="bg-teal-600 hover:bg-teal-700 text-white">
+                      Sign In
+                    </Button>
+                  </Link>
+                )
               )
             )}
           </div>

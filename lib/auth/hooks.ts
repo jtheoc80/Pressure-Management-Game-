@@ -4,7 +4,6 @@ import { useUser as useClerkUser, useAuth as useClerkAuth } from "@clerk/nextjs"
 
 // Check if Clerk is configured
 export const isClerkConfigured = () => {
-  if (typeof window === "undefined") return false;
   const key = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
   return key && key.startsWith("pk_") && key.length > 20;
 };
