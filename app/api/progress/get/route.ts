@@ -23,6 +23,8 @@ export async function GET() {
         coach_mode_off: false,
       },
       coachModeEnabled: true,
+      completedDrills: [],
+      completedCases: [],
     };
 
     // Try to get data from Supabase if available

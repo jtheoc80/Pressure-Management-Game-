@@ -8,13 +8,17 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { BookOpen, FileText, GraduationCap, Target, CheckCircle2, Clock, Zap } from "lucide-react";
 import { getLessonsByTrack, isLessonUnlocked } from "@/lib/academy/lessons";
+import { cases } from "@/lib/academy/cases";
+import { getDrillByLessonId } from "@/lib/academy/drills";
 import type { Lesson, UserProgress, LessonProgress } from "@/lib/academy/types";
 
 export default function LearnPage() {
   const { isSignedIn, user } = useSafeUser();
   const [progress, setProgress] = useState<UserProgress | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("lessons");
   const [activeTrack, setActiveTrack] = useState<"psv" | "tank_flame">("psv");
 
   useEffect(() => {
@@ -37,6 +41,8 @@ export default function LearnPage() {
 
   const psvLessons = getLessonsByTrack("psv");
   const tankFlameLessons = getLessonsByTrack("tank_flame");
+  const psvCases = cases.filter(c => c.track === "psv");
+  const tankFlameCases = cases.filter(c => c.track === "tank_flame");
 
   const completedLessonIds = progress
     ? Object.keys(progress.lessonProgress).filter(
@@ -44,17 +50,33 @@ export default function LearnPage() {
       )
     : [];
 
+  const completedDrills = progress?.completedDrills || [];
+
   const getTrackProgress = (lessons: Lesson[]) => {
     const completed = lessons.filter((l) => completedLessonIds.includes(l.id)).length;
     return Math.round((completed / lessons.length) * 100);
+  };
+
+  const getTrackReadiness = (lessons: Lesson[]) => {
+    // Count lessons with completed drills
+    const lessonsWithDrills = lessons.filter(l => getDrillByLessonId(l.id));
+    const drillsCompleted = lessonsWithDrills.filter(l => {
+      const drill = getDrillByLessonId(l.id);
+      return drill && completedDrills.includes(drill.id);
+    }).length;
+    return lessonsWithDrills.length > 0 
+      ? Math.round((drillsCompleted / lessonsWithDrills.length) * 100)
+      : 100;
   };
 
   const getLessonStatus = (lesson: Lesson) => {
     const lessonProgress = progress?.lessonProgress[lesson.id];
     const isCompleted = !!lessonProgress?.completedAt;
     const isUnlocked = isLessonUnlocked(lesson.id, completedLessonIds);
+    const drill = getDrillByLessonId(lesson.id);
+    const drillCompleted = drill ? completedDrills.includes(drill.id) : true;
     
-    return { isCompleted, isUnlocked, lessonProgress };
+    return { isCompleted, isUnlocked, lessonProgress, drillCompleted };
   };
 
   return (
@@ -69,7 +91,10 @@ export default function LearnPage() {
                 <span>/</span>
                 <span>Training Academy</span>
               </div>
-              <h1 className="text-3xl font-bold">Puffer Training Academy</h1>
+              <h1 className="text-3xl font-bold flex items-center gap-3">
+                <GraduationCap className="w-8 h-8" />
+                Puffer Training Academy
+              </h1>
               <p className="text-white/70 mt-2 max-w-2xl">
                 Master the fundamentals of pressure relief and tank protection before tackling 
                 real scenarios. Complete required lessons to unlock gameplay.
@@ -94,82 +119,214 @@ export default function LearnPage() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-8">
-        {/* Objective Banner */}
-        <Card className="mb-8 border-l-4 border-l-blue-500 bg-blue-50/50">
-          <CardContent className="py-4">
-            <div className="flex items-start gap-4">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2">
-                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                </svg>
-              </div>
-              <div>
-                <h2 className="font-semibold text-slate-800">Your Learning Objective</h2>
-                <p className="text-sm text-slate-600 mt-1">
-                  Complete the required PSV lessons (marked with ⭐) to unlock PSV Sizing Quest scenarios. 
-                  Tank & Flame lessons unlock tank protection scenarios. Each lesson includes a quiz—
-                  score 80% or higher to mark it complete.
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Track Tabs */}
-        <Tabs value={activeTrack} onValueChange={(v) => setActiveTrack(v as "psv" | "tank_flame")}>
-          <TabsList className="mb-6">
-            <TabsTrigger value="psv" className="gap-2">
-              <span>🔧</span> PSV Track
-              <Badge variant="secondary" className="ml-1">
-                {getTrackProgress(psvLessons)}%
-              </Badge>
+        {/* Main Navigation Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid w-full max-w-md grid-cols-3">
+            <TabsTrigger value="lessons" className="gap-2">
+              <BookOpen className="w-4 h-4" />
+              Lessons
             </TabsTrigger>
-            <TabsTrigger value="tank_flame" className="gap-2">
-              <span>🛢️</span> Tank & Flame Track
-              <Badge variant="secondary" className="ml-1">
-                {getTrackProgress(tankFlameLessons)}%
-              </Badge>
+            <TabsTrigger value="casebook" className="gap-2">
+              <FileText className="w-4 h-4" />
+              Casebook
+            </TabsTrigger>
+            <TabsTrigger value="glossary" className="gap-2">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+              </svg>
+              Glossary
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="psv">
-            <TrackContent
-              lessons={psvLessons}
-              trackName="PSV Fundamentals"
-              trackDescription="Learn pressure relief device terminology, sizing concepts, and valve selection before playing PSV Sizing Quest."
-              unlockBadge="Unlocks: PSV Sizing Quest scenarios"
-              getLessonStatus={getLessonStatus}
-              isLoading={isLoading}
-            />
+          {/* Lessons Tab */}
+          <TabsContent value="lessons" className="space-y-6">
+            {/* Objective Banner */}
+            <Card className="border-l-4 border-l-blue-500 bg-blue-50/50">
+              <CardContent className="py-4">
+                <div className="flex items-start gap-4">
+                  <div className="p-2 bg-blue-100 rounded-lg">
+                    <Target className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <div>
+                    <h2 className="font-semibold text-slate-800">Your Learning Objective</h2>
+                    <p className="text-sm text-slate-600 mt-1">
+                      Complete the required PSV lessons (marked with ⭐) to unlock PSV Sizing Quest scenarios. 
+                      Tank & Flame lessons unlock tank protection scenarios. Each lesson includes a drill and quiz—
+                      pass both to mark it complete.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Track Tabs */}
+            <Tabs value={activeTrack} onValueChange={(v) => setActiveTrack(v as "psv" | "tank_flame")}>
+              <TabsList className="mb-6">
+                <TabsTrigger value="psv" className="gap-2">
+                  <span>🔧</span> PSV Track
+                  <Badge variant="secondary" className="ml-1">
+                    {getTrackProgress(psvLessons)}%
+                  </Badge>
+                </TabsTrigger>
+                <TabsTrigger value="tank_flame" className="gap-2">
+                  <span>🛢️</span> Tank & Flame Track
+                  <Badge variant="secondary" className="ml-1">
+                    {getTrackProgress(tankFlameLessons)}%
+                  </Badge>
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="psv">
+                <TrackContent
+                  lessons={psvLessons}
+                  trackName="PSV Fundamentals"
+                  trackDescription="Learn pressure relief device terminology, sizing concepts, and valve selection before playing PSV Sizing Quest."
+                  unlockBadge="Unlocks: PSV Sizing Quest scenarios"
+                  getLessonStatus={getLessonStatus}
+                  readinessPercent={getTrackReadiness(psvLessons)}
+                  isLoading={isLoading}
+                />
+              </TabsContent>
+
+              <TabsContent value="tank_flame">
+                <TrackContent
+                  lessons={tankFlameLessons}
+                  trackName="Tank & Flame Protection"
+                  trackDescription="Understand atmospheric tank protection, PVRV selection, flame arresters, and overfill prevention."
+                  unlockBadge="Unlocks: Tank Protection scenarios"
+                  getLessonStatus={getLessonStatus}
+                  readinessPercent={getTrackReadiness(tankFlameLessons)}
+                  isLoading={isLoading}
+                />
+              </TabsContent>
+            </Tabs>
           </TabsContent>
 
-          <TabsContent value="tank_flame">
-            <TrackContent
-              lessons={tankFlameLessons}
-              trackName="Tank & Flame Protection"
-              trackDescription="Understand atmospheric tank protection, PVRV selection, flame arresters, and overfill prevention."
-              unlockBadge="Unlocks: Tank Protection scenarios"
-              getLessonStatus={getLessonStatus}
-              isLoading={isLoading}
-            />
+          {/* Casebook Tab */}
+          <TabsContent value="casebook" className="space-y-6">
+            <Card className="border-l-4 border-l-amber-500 bg-amber-50/50">
+              <CardContent className="py-4">
+                <div className="flex items-start gap-4">
+                  <div className="p-2 bg-amber-100 rounded-lg">
+                    <FileText className="w-6 h-6 text-amber-600" />
+                  </div>
+                  <div>
+                    <h2 className="font-semibold text-slate-800">Real-World Case Studies</h2>
+                    <p className="text-sm text-slate-600 mt-1">
+                      Learn from actual incidents and scenarios. Each case includes the narrative, 
+                      required inputs, common mistakes, and standard references.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="grid md:grid-cols-2 gap-4">
+              {/* PSV Cases */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    🔧 PSV Cases
+                    <Badge variant="secondary">{psvCases.length} cases</Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {psvCases.slice(0, 3).map((c) => (
+                    <Link key={c.id} href={`/learn/cases/${c.id}`}>
+                      <div className="p-3 rounded-lg border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-all">
+                        <h4 className="font-medium text-slate-800 text-sm">{c.title}</h4>
+                        <p className="text-xs text-slate-500 mt-1 line-clamp-1">{c.summary}</p>
+                      </div>
+                    </Link>
+                  ))}
+                  <Link href="/learn/cases?track=psv">
+                    <Button variant="outline" className="w-full mt-2" size="sm">
+                      View All PSV Cases →
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+
+              {/* Tank/Flame Cases */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    🛢️ Tank & Flame Cases
+                    <Badge variant="secondary">{tankFlameCases.length} cases</Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {tankFlameCases.slice(0, 3).map((c) => (
+                    <Link key={c.id} href={`/learn/cases/${c.id}`}>
+                      <div className="p-3 rounded-lg border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-all">
+                        <h4 className="font-medium text-slate-800 text-sm">{c.title}</h4>
+                        <p className="text-xs text-slate-500 mt-1 line-clamp-1">{c.summary}</p>
+                      </div>
+                    </Link>
+                  ))}
+                  <Link href="/learn/cases?track=tank_flame">
+                    <Button variant="outline" className="w-full mt-2" size="sm">
+                      View All Tank Cases →
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+            </div>
+
+            <Link href="/learn/cases">
+              <Button className="w-full bg-[#003366]">
+                Browse All {cases.length} Case Studies
+              </Button>
+            </Link>
+          </TabsContent>
+
+          {/* Glossary Tab - Quick Link */}
+          <TabsContent value="glossary" className="space-y-6">
+            <Card className="border-l-4 border-l-purple-500 bg-purple-50/50">
+              <CardContent className="py-4">
+                <div className="flex items-start gap-4">
+                  <div className="p-2 bg-purple-100 rounded-lg">
+                    <BookOpen className="w-6 h-6 text-purple-600" />
+                  </div>
+                  <div>
+                    <h2 className="font-semibold text-slate-800">Industry Terminology</h2>
+                    <p className="text-sm text-slate-600 mt-1">
+                      Browse 60+ industry terms with definitions, examples, common mistakes, 
+                      and related concepts. Essential reference for understanding PSV and tank protection.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="text-center py-8">
+              <BookOpen className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-slate-800 mb-2">Full Glossary</h3>
+              <p className="text-slate-600 mb-4">
+                Access the complete searchable glossary with filtering by category.
+              </p>
+              <Link href="/glossary">
+                <Button className="bg-[#003366]">
+                  Open Glossary →
+                </Button>
+              </Link>
+            </div>
           </TabsContent>
         </Tabs>
 
         {/* Quick Links */}
         <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Link href="/glossary">
+          <Link href="/learn/cases">
             <Card className="hover:shadow-md transition-shadow cursor-pointer border-slate-200 h-full">
               <CardContent className="py-4">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-slate-100 rounded-lg">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2">
-                      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-                      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-                    </svg>
+                  <div className="p-2 bg-amber-100 rounded-lg">
+                    <FileText className="w-5 h-5 text-amber-600" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-slate-800">Glossary</h3>
-                    <p className="text-sm text-slate-500">Browse 60+ industry terms with examples</p>
+                    <h3 className="font-semibold text-slate-800">Casebook</h3>
+                    <p className="text-sm text-slate-500">Real-world scenarios with {cases.length} case studies</p>
                   </div>
                 </div>
               </CardContent>
@@ -180,10 +337,8 @@ export default function LearnPage() {
             <Card className="hover:shadow-md transition-shadow cursor-pointer border-slate-200 h-full">
               <CardContent className="py-4">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-slate-100 rounded-lg">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2">
-                      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
-                    </svg>
+                  <div className="p-2 bg-blue-100 rounded-lg">
+                    <Zap className="w-5 h-5 text-blue-600" />
                   </div>
                   <div>
                     <h3 className="font-semibold text-slate-800">PSV Sizing Quest</h3>
@@ -208,7 +363,9 @@ interface TrackContentProps {
     isCompleted: boolean;
     isUnlocked: boolean;
     lessonProgress: LessonProgress | undefined;
+    drillCompleted: boolean;
   };
+  readinessPercent: number;
   isLoading: boolean;
 }
 
@@ -218,6 +375,7 @@ function TrackContent({
   trackDescription,
   unlockBadge,
   getLessonStatus,
+  readinessPercent,
   isLoading,
 }: TrackContentProps) {
   const completedCount = lessons.filter((l) => getLessonStatus(l).isCompleted).length;
@@ -240,14 +398,38 @@ function TrackContent({
           <p className="text-sm text-slate-500">{trackDescription}</p>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center gap-4">
-            <Progress value={(completedCount / lessons.length) * 100} className="flex-1 h-2" />
-            <span className="text-sm font-medium text-slate-600">
-              {completedCount}/{lessons.length} complete
-            </span>
-          </div>
-          <div className="mt-2 text-xs text-slate-500">
-            Required lessons: {requiredCompleted}/{requiredCount} complete
+          <div className="grid md:grid-cols-2 gap-4">
+            {/* Progress */}
+            <div>
+              <div className="flex items-center justify-between text-sm mb-1">
+                <span className="text-slate-600">Lessons Complete</span>
+                <span className="font-medium">{completedCount}/{lessons.length}</span>
+              </div>
+              <Progress value={(completedCount / lessons.length) * 100} className="h-2" />
+              <div className="mt-1 text-xs text-slate-500">
+                Required: {requiredCompleted}/{requiredCount}
+              </div>
+            </div>
+            
+            {/* Readiness */}
+            <div>
+              <div className="flex items-center justify-between text-sm mb-1">
+                <span className="text-slate-600 flex items-center gap-1">
+                  <Target className="w-3 h-3" />
+                  Drill Readiness
+                </span>
+                <span className={`font-medium ${readinessPercent >= 80 ? "text-emerald-600" : "text-amber-600"}`}>
+                  {readinessPercent}%
+                </span>
+              </div>
+              <Progress 
+                value={readinessPercent} 
+                className={`h-2 ${readinessPercent >= 80 ? "[&>div]:bg-emerald-500" : "[&>div]:bg-amber-500"}`} 
+              />
+              <div className="mt-1 text-xs text-slate-500">
+                {readinessPercent >= 80 ? "Ready for quizzes!" : "Complete drills before quizzes"}
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -255,7 +437,8 @@ function TrackContent({
       {/* Lesson List */}
       <div className="space-y-3">
         {lessons.map((lesson, index) => {
-          const { isCompleted, isUnlocked, lessonProgress } = getLessonStatus(lesson);
+          const { isCompleted, isUnlocked, lessonProgress, drillCompleted } = getLessonStatus(lesson);
+          const hasDrill = !!getDrillByLessonId(lesson.id);
 
           return (
             <LessonCard
@@ -265,6 +448,8 @@ function TrackContent({
               isCompleted={isCompleted}
               isUnlocked={isUnlocked}
               bestScore={lessonProgress?.bestScore}
+              hasDrill={hasDrill}
+              drillCompleted={drillCompleted}
               isLoading={isLoading}
             />
           );
@@ -280,6 +465,8 @@ interface LessonCardProps {
   isCompleted: boolean;
   isUnlocked: boolean;
   bestScore?: number;
+  hasDrill: boolean;
+  drillCompleted: boolean;
   isLoading: boolean;
 }
 
@@ -289,6 +476,8 @@ function LessonCard({
   isCompleted,
   isUnlocked,
   bestScore,
+  hasDrill,
+  drillCompleted,
   isLoading,
 }: LessonCardProps) {
   return (
@@ -314,9 +503,7 @@ function LessonCard({
             }`}
           >
             {isCompleted ? (
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
+              <CheckCircle2 className="w-5 h-5" />
             ) : isUnlocked ? (
               index + 1
             ) : (
@@ -329,7 +516,7 @@ function LessonCard({
 
           {/* Lesson Info */}
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <h3 className={`font-semibold ${isUnlocked ? "text-slate-800" : "text-slate-500"}`}>
                 {lesson.title}
               </h3>
@@ -343,9 +530,18 @@ function LessonCard({
                   🔓 Unlocks access
                 </Badge>
               )}
+              {hasDrill && !drillCompleted && isUnlocked && (
+                <Badge variant="outline" className="text-xs bg-violet-50 text-violet-600 border-violet-200">
+                  <Target className="w-3 h-3 mr-1" />
+                  Drill available
+                </Badge>
+              )}
             </div>
             <div className="flex items-center gap-3 mt-1 text-xs text-slate-500">
-              <span>~{lesson.estMinutes} min</span>
+              <span className="flex items-center gap-1">
+                <Clock className="w-3 h-3" />
+                ~{lesson.estMinutes} min
+              </span>
               <span>•</span>
               <span>{lesson.objectives.length} objectives</span>
               {bestScore !== undefined && bestScore > 0 && (

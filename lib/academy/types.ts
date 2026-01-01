@@ -1,14 +1,30 @@
 /**
  * Training Academy Types
- * Data models for lessons, glossary, and quizzes
+ * Data models for lessons, glossary, quizzes, cases, and drills
  */
 
 export type Track = "psv" | "tank_flame";
 
-export type SectionType = "text" | "diagram" | "callout" | "check" | "quiz";
+// Section Types
+export type SectionType = 
+  | "text" 
+  | "diagram" 
+  | "callout" 
+  | "check" 
+  | "quiz"
+  | "image"
+  | "gallery"
+  | "hotspot"
+  | "case"
+  | "rule"
+  | "worked"
+  | "drill";
 
 export type CalloutVariant = "tip" | "warning" | "example";
 
+export type WorkedCheckType = "unit_sanity" | "psig_psia" | "f_to_r" | "bp_percent";
+
+// Section Interfaces
 export interface TextSection {
   type: "text";
   heading?: string;
@@ -37,12 +53,88 @@ export interface QuizSection {
   quizId: string;
 }
 
+export interface ImageSection {
+  type: "image";
+  src: string;
+  alt: string;
+  caption?: string;
+  credit?: string;
+}
+
+export interface GalleryImage {
+  src: string;
+  alt: string;
+  caption?: string;
+  credit?: string;
+}
+
+export interface GallerySection {
+  type: "gallery";
+  images: GalleryImage[];
+}
+
+export interface Hotspot {
+  xPct: number;
+  yPct: number;
+  label: string;
+  body: string;
+}
+
+export interface HotspotSection {
+  type: "hotspot";
+  imageSrc: string;
+  imageAlt: string;
+  hotspots: Hotspot[];
+}
+
+export interface CaseSection {
+  type: "case";
+  caseId: string;
+}
+
+export interface RuleSection {
+  type: "rule";
+  title: string;
+  body: string;
+  quote?: string;
+  sourceLabel: string;
+  sourceUrl?: string;
+}
+
+export interface WorkedField {
+  key: string;
+  label: string;
+  unit?: string;
+  correctAnswer?: string | number;
+}
+
+export interface WorkedSection {
+  type: "worked";
+  title: string;
+  prompt: string;
+  fields: WorkedField[];
+  check: WorkedCheckType;
+  explanation?: string;
+}
+
+export interface DrillSection {
+  type: "drill";
+  drillId: string;
+}
+
 export type LessonSection =
   | TextSection
   | DiagramSection
   | CalloutSection
   | CheckSection
-  | QuizSection;
+  | QuizSection
+  | ImageSection
+  | GallerySection
+  | HotspotSection
+  | CaseSection
+  | RuleSection
+  | WorkedSection
+  | DrillSection;
 
 export type UnlockKey = "psv_play" | "tank_flame_play" | "coach_mode_off";
 
@@ -57,8 +149,10 @@ export interface Lesson {
   unlocks: UnlockKey[];
   order: number;
   prerequisiteIds?: string[];
+  drillRequired?: boolean; // Must complete drill before quiz
 }
 
+// Glossary Types
 export type GlossaryCategory =
   | "Pressure"
   | "Thermo"
@@ -79,28 +173,76 @@ export interface GlossaryTerm {
   related?: string[];
 }
 
+// Quiz Types
 export interface QuizQuestion {
   id: string;
   question: string;
   options: string[];
   correctIndex: number;
   explanation: string;
+  objectiveIndex?: number; // Links to lesson objective for "retake with focus"
 }
 
 export interface Quiz {
   id: string;
   lessonId: string;
   title: string;
-  passingScore: number; // percentage, e.g., 80
+  passingScore: number;
   questions: QuizQuestion[];
 }
 
-// Progress tracking types
+// Case Study Types
+export type CaseEnvironment = "refinery" | "chemical" | "terminal" | "offshore" | "pipeline";
+
+export interface CaseRuleRef {
+  title: string;
+  body: string;
+  quote?: string;
+  sourceLabel: string;
+  sourceUrl?: string;
+}
+
+export interface CaseStudy {
+  id: string;
+  track: Track;
+  environment: CaseEnvironment;
+  title: string;
+  summary: string;
+  narrative: string;
+  diagramKey?: string;
+  photos: GalleryImage[];
+  requiredInputs: string[];
+  commonMistakes: string[];
+  ruleRefs: CaseRuleRef[];
+  linkedScenarioId?: string; // Links to /psv-quest scenario
+}
+
+// Drill Types
+export interface DrillQuestion {
+  id: string;
+  question: string;
+  options: string[];
+  correctIndex: number;
+  hint?: string;
+  explanation: string;
+}
+
+export interface Drill {
+  id: string;
+  lessonId: string;
+  title: string;
+  description: string;
+  questions: DrillQuestion[];
+}
+
+// Progress Tracking Types
 export interface LessonProgress {
   lessonId: string;
   bestScore: number;
   completedAt: string | null;
   attempts: number;
+  drillCompleted?: boolean;
+  weakObjectives?: number[]; // Indices of objectives missed in quiz
 }
 
 export interface UserUnlocks {
@@ -113,6 +255,8 @@ export interface UserProgress {
   lessonProgress: Record<string, LessonProgress>;
   unlocks: UserUnlocks;
   coachModeEnabled: boolean;
+  completedDrills: string[];
+  completedCases: string[];
 }
 
 export const DEFAULT_UNLOCKS: UserUnlocks = {
@@ -125,4 +269,6 @@ export const DEFAULT_PROGRESS: UserProgress = {
   lessonProgress: {},
   unlocks: DEFAULT_UNLOCKS,
   coachModeEnabled: true,
+  completedDrills: [],
+  completedCases: [],
 };
