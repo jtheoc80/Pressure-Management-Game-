@@ -40,7 +40,7 @@ export const lessons: Lesson[] = [
       },
       {
         type: "diagram",
-        key: "PressureBasicsDiagram",
+        key: "mawp-set-accumulation",
         caption: "Relationship between operating pressure, set pressure, and MAWP",
       },
       {
@@ -109,8 +109,13 @@ export const lessons: Lesson[] = [
       },
       {
         type: "diagram",
-        key: "PsigPsiaDiagram",
+        key: "psig-psia",
         caption: "Understanding psig vs psia conversions – absolute vs gauge pressure",
+      },
+      {
+        type: "diagram",
+        key: "units-workbench",
+        caption: "Practice unit conversions interactively",
       },
       {
         type: "callout",
@@ -201,8 +206,13 @@ export const lessons: Lesson[] = [
       },
       {
         type: "diagram",
-        key: "RelievingScenariosTable",
+        key: "relieving-scenarios",
         caption: "Common relieving scenarios from API 521 Table 1",
+      },
+      {
+        type: "diagram",
+        key: "relieving-case-decision-tree",
+        caption: "Decision tree for identifying relieving cases",
       },
       {
         type: "rule",
@@ -292,6 +302,11 @@ export const lessons: Lesson[] = [
         type: "diagram",
         key: "BackpressureDiagram",
         caption: "Superimposed vs built-up backpressure",
+      },
+      {
+        type: "diagram",
+        key: "backpressure-impact",
+        caption: "How backpressure affects conventional PSV performance",
       },
       {
         type: "text",
@@ -456,8 +471,13 @@ export const lessons: Lesson[] = [
       },
       {
         type: "diagram",
-        key: "OrificeConceptDiagram",
-        caption: "API 526 standard orifice letter designations and effective areas",
+        key: "orifice-concept",
+        caption: "API 526 standard orifice letter designations",
+      },
+      {
+        type: "diagram",
+        key: "orifice-ladder",
+        caption: "API 526 orifice capacity ladder showing all standard sizes",
       },
       {
         type: "text",
@@ -527,9 +547,19 @@ export const lessons: Lesson[] = [
         body: "Gas relief sizing is based on mass flow rate (lb/hr) through the orifice. Key properties include: molecular weight (MW), ratio of specific heats (k = Cp/Cv), compressibility factor (Z), and relieving temperature. These properties determine the gas density and flow characteristics.",
       },
       {
+        type: "diagram",
+        key: "gas-props",
+        caption: "Key gas properties for PSV sizing",
+      },
+      {
         type: "text",
         heading: "Critical vs Subcritical Flow",
         body: "Gas flow through an orifice is typically critical (choked) when the downstream pressure is less than about 53% of upstream pressure. Critical flow means the flow rate is limited by sonic velocity at the orifice throat and is independent of downstream pressure.",
+      },
+      {
+        type: "diagram",
+        key: "choked-flow",
+        caption: "Understanding critical (choked) flow through an orifice",
       },
       {
         type: "callout",
@@ -627,6 +657,11 @@ export const lessons: Lesson[] = [
         body: "Liquid relief sizing is based on volumetric flow rate (GPM) rather than mass flow. Liquids are incompressible, so flow rate depends on differential pressure across the valve, fluid density (specific gravity), and viscosity.",
       },
       {
+        type: "diagram",
+        key: "liquid-props",
+        caption: "Liquid properties that affect PSV sizing",
+      },
+      {
         type: "text",
         heading: "Specific Gravity and Viscosity",
         body: "Specific Gravity (SG): Ratio of liquid density to water. Higher SG = higher mass flow for same volumetric flow. Viscosity: Affects flow through the orifice. High-viscosity liquids require viscosity correction factors.",
@@ -635,6 +670,11 @@ export const lessons: Lesson[] = [
         type: "text",
         heading: "Thermal Expansion Relief",
         body: "Liquid trapped in equipment (blocked-in heat exchangers, piping) can expand when heated, generating hydraulic pressure. Thermal relief valves are sized for small flow rates (often 1-10 GPM) to relieve this expansion.",
+      },
+      {
+        type: "diagram",
+        key: "thermal-expansion",
+        caption: "Thermal expansion in blocked-in liquid systems",
       },
       {
         type: "callout",
@@ -672,6 +712,11 @@ export const lessons: Lesson[] = [
     ],
     sections: [
       {
+        type: "diagram",
+        key: "discharge-destinations",
+        caption: "PSV discharge destination options",
+      },
+      {
         type: "text",
         heading: "Atmospheric Discharge",
         body: "Discharge to atmosphere is the simplest option but is limited to non-hazardous fluids. Steam, air, and inert gases may be discharged to atmosphere with proper location and dispersion. Environmental regulations restrict atmospheric discharge of VOCs and toxics.",
@@ -680,6 +725,11 @@ export const lessons: Lesson[] = [
         type: "text",
         heading: "Flare System Discharge",
         body: "Flare systems collect relief discharges and combust them safely. Flare headers are shared among multiple relief sources, creating variable backpressure. Flare systems include knockout drums to separate liquids before the flare tip.",
+      },
+      {
+        type: "diagram",
+        key: "flare-header-bp",
+        caption: "Variable backpressure in shared flare headers",
       },
       {
         type: "text",
@@ -727,9 +777,24 @@ export const lessons: Lesson[] = [
         body: "The PSV datasheet is a formal specification document that captures all requirements for valve selection. It communicates design basis to vendors, provides documentation for regulatory compliance, and serves as reference for maintenance and operations.",
       },
       {
+        type: "diagram",
+        key: "sizing-workflow",
+        caption: "PSV sizing workflow checklist",
+      },
+      {
         type: "text",
         heading: "Key Datasheet Sections",
         body: "1) Header: Unit, equipment, tag number, revision. 2) Service Conditions: Set pressure, relieving temp, fluid type. 3) Relieving Requirements: Case, flow rate, fluid properties. 4) Discharge: Destination, backpressure. 5) Selection: Valve type, orifice, materials.",
+      },
+      {
+        type: "diagram",
+        key: "datasheet-gas",
+        caption: "PSV datasheet map for gas/steam service",
+      },
+      {
+        type: "diagram",
+        key: "datasheet-liquid",
+        caption: "PSV datasheet map for liquid service",
       },
       {
         type: "callout",
@@ -772,9 +837,19 @@ export const lessons: Lesson[] = [
     ],
     sections: [
       {
+        type: "diagram",
+        key: "common-mistakes",
+        caption: "The Wall of Common PSV Sizing Mistakes",
+      },
+      {
         type: "text",
         heading: "Mistake: Ignoring Backpressure",
         body: "Using a conventional valve in high-backpressure service is a common and dangerous mistake. The valve may not open at set pressure, or may have significantly reduced capacity. Always evaluate backpressure and select appropriate valve type.",
+      },
+      {
+        type: "diagram",
+        key: "assumptions",
+        caption: "Good vs Bad assumptions in PSV sizing",
       },
       {
         type: "text",
@@ -849,6 +924,11 @@ export const lessons: Lesson[] = [
         caption: "Tank breathing: in-breathing and out-breathing scenarios",
       },
       {
+        type: "diagram",
+        key: "breathing-triggers",
+        caption: "What causes tank inbreathing and outbreathing",
+      },
+      {
         type: "text",
         heading: "Tank Breathing",
         body: "Tanks 'breathe' due to thermal effects and pumping operations:\n\n• OUT-BREATHING (pressure relief): Occurs during filling or heating – vapor must escape\n• IN-BREATHING (vacuum relief): Occurs during emptying or cooling – air must enter\n\nBoth must be accommodated to prevent damage.",
@@ -910,8 +990,13 @@ export const lessons: Lesson[] = [
       },
       {
         type: "diagram",
-        key: "PVVentCategoriesDiagram",
+        key: "pv-vent-categories",
         caption: "Normal PVRV venting vs Emergency venting requirements",
+      },
+      {
+        type: "diagram",
+        key: "pv-vs-emergency",
+        caption: "Comparing PV vent and emergency vent functions",
       },
       {
         type: "text",
@@ -1019,7 +1104,7 @@ export const lessons: Lesson[] = [
     prerequisiteIds: ["tank-102"],
   },
   {
-    id: "tank-103",
+    id: "tank-104",
     track: "tank_flame",
     title: "Flame Arresters Fundamentals",
     estMinutes: 10,
@@ -1035,6 +1120,11 @@ export const lessons: Lesson[] = [
         body: "Tanks containing flammable liquids can have combustible vapor spaces. A flame arrester prevents external ignition sources from propagating back into the tank. It quenches flames by absorbing heat through a matrix of small passages.",
       },
       {
+        type: "diagram",
+        key: "flame-arrester",
+        caption: "Flame arrester operating principle",
+      },
+      {
         type: "text",
         heading: "Operating Principle",
         body: "Flame arresters contain a 'crimped ribbon' or matrix element with passages smaller than the flame quenching diameter. The flame front is divided into small segments and heat is absorbed, extinguishing the flame before it passes through.",
@@ -1043,6 +1133,16 @@ export const lessons: Lesson[] = [
         type: "text",
         heading: "Deflagration vs Detonation",
         body: "Deflagration arresters handle subsonic flame fronts (slower burning). Detonation arresters handle supersonic flame fronts from pipe detonations. End-of-line arresters (at tank vents) are typically deflagration type; in-line arresters may be detonation type.",
+      },
+      {
+        type: "diagram",
+        key: "flame-vs-detonation",
+        caption: "Deflagration vs detonation flame fronts",
+      },
+      {
+        type: "diagram",
+        key: "arrester-placement",
+        caption: "Flame arrester placement examples",
       },
       {
         type: "callout",
@@ -1066,7 +1166,7 @@ export const lessons: Lesson[] = [
     requiredToUnlock: false,
     unlocks: [],
     order: 4,
-    prerequisiteIds: ["tank-103"],
+    prerequisiteIds: ["tank-104"],
   },
   {
     id: "tank-105",
@@ -1085,9 +1185,19 @@ export const lessons: Lesson[] = [
         caption: "Vapor routing options: ATM, VRU, or Flare",
       },
       {
+        type: "diagram",
+        key: "vapor-control-map",
+        caption: "Decision map for vapor control system selection",
+      },
+      {
         type: "text",
         heading: "Why Vapor Control?",
         body: "Environmental regulations limit VOC emissions from tanks. Vapor control systems capture displaced vapors during filling or breathing. Options include vapor recovery units (VRUs), vapor combustion units, or connection to flare systems.",
+      },
+      {
+        type: "diagram",
+        key: "vapor-manifold",
+        caption: "Terminal loading vapor manifold system",
       },
       {
         type: "text",
@@ -1140,14 +1250,29 @@ export const lessons: Lesson[] = [
         caption: "Layers of protection: gauge → alarm → shutdown",
       },
       {
+        type: "diagram",
+        key: "overfill-timeline",
+        caption: "Overfill event timeline per API 2350",
+      },
+      {
         type: "text",
         heading: "Why Overfill Matters",
         body: "Overfilling a tank can cause environmental spills, equipment damage, fires, and loss of containment. Overfill protection uses multiple layers of detection and response to prevent these incidents.",
       },
       {
+        type: "diagram",
+        key: "alarm-layering",
+        caption: "Independent alarm layers for level monitoring",
+      },
+      {
         type: "text",
         heading: "Protection Layers",
         body: "Layer 1: Manual gauging and inspection. Layer 2: High level alarm (alerts operators). Layer 3: High-high level alarm (independent, safety-critical). Layer 4: Automatic shutdown (closes inlet valves). Defense in depth provides reliable protection.",
+      },
+      {
+        type: "diagram",
+        key: "gauge-types",
+        caption: "Tank level gauge types comparison",
       },
       {
         type: "text",

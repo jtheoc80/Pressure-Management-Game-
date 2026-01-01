@@ -9,3 +9,4 @@ export * from "./glossary";
 export * from "./quizzes";
 export * from "./cases";
 export * from "./drills";
+export * from "./diagramRegistry";

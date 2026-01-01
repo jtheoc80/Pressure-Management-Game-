@@ -6,6 +6,7 @@ import { AlertTriangle, Lightbulb, BookOpen, CheckCircle2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import type { LessonSection } from "@/lib/academy/types";
 import { diagramComponents } from "./diagrams";
+import { diagramRegistry } from "@/lib/academy/diagramRegistry";
 import { ImageGallery } from "./ImageGallery";
 import { HotspotImage } from "./HotspotImage";
 import { RuleCard } from "./RuleCard";
@@ -40,7 +41,10 @@ export function LessonRenderer({ sections, onQuizComplete, onDrillComplete }: Le
         );
 
       case "diagram":
-        const DiagramComponent = diagramComponents[section.key as keyof typeof diagramComponents];
+        // Check both old diagramComponents and new diagramRegistry
+        const DiagramComponent = 
+          diagramComponents[section.key as keyof typeof diagramComponents] ||
+          diagramRegistry[section.key];
         if (!DiagramComponent) {
           return (
             <Card key={index} className="border-amber-200 bg-amber-50">
