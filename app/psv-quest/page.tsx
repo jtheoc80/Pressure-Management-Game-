@@ -2,26 +2,56 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { SignInButton } from "@clerk/nextjs";
+import { useSafeUser } from "@/lib/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { LevelCard } from "@/components/psv/LevelCard";
 import { CompetencyBars } from "@/components/psv/CompetencyBars";
 import { scenarios, getProfile, getRankProgress } from "@/lib/psv";
 import { getXPReward } from "@/lib/psv/brand";
+import { getRequiredLessonsForUnlock } from "@/lib/academy/lessons";
 import type { PlayerProfile, Scenario } from "@/lib/psv/types";
+import type { UserProgress } from "@/lib/academy/types";
 
 export default function PSVQuestLobby() {
+  const { isSignedIn, isLoaded: clerkLoaded } = useSafeUser();
   const [profile, setProfile] = useState<PlayerProfile | null>(null);
+  const [academyProgress, setAcademyProgress] = useState<UserProgress | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const loadProfile = () => {
+    const loadData = async () => {
+      // Load local game profile
       setProfile(getProfile());
+      
+      // Load academy progress if signed in
+      if (isSignedIn) {
+        try {
+          const res = await fetch("/api/progress/get");
+          if (res.ok) {
+            const data = await res.json();
+            setAcademyProgress(data);
+          }
+        } catch (error) {
+          console.error("Failed to load academy progress:", error);
+        }
+      }
+      
       setIsLoading(false);
     };
-    loadProfile();
-  }, []);
+    
+    if (clerkLoaded) {
+      loadData();
+    }
+  }, [isSignedIn, clerkLoaded]);
+
+  // Check if PSV play is unlocked
+  const isPSVUnlocked = academyProgress?.unlocks.psv_play || false;
+  const isCoachModeOn = academyProgress?.coachModeEnabled ?? true;
+  const requiredLessons = getRequiredLessonsForUnlock("psv_play");
 
   if (isLoading || !profile) {
     return (
@@ -75,20 +105,79 @@ export default function PSVQuestLobby() {
         <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div>
+              <div className="flex items-center gap-2 text-white/60 text-sm mb-1">
+                <Link href="/" className="hover:text-white">Home</Link>
+                <span>/</span>
+                <span>PSV Sizing Quest</span>
+              </div>
               <h1 className="text-2xl font-bold">PSV Sizing Quest</h1>
               <p className="text-white/70 text-sm mt-0.5">
                 Master pressure safety valve selection
               </p>
             </div>
             <div className="text-right">
-              <div className="text-sm text-white/60">Puffer Training</div>
-              <div className="text-xs text-white/40">Training mode only</div>
+              {isSignedIn ? (
+                <div className="flex items-center gap-2">
+                  {isCoachModeOn && (
+                    <span className="px-2 py-1 bg-amber-500/20 text-amber-200 text-xs rounded-full">
+                      🎓 Coach Mode
+                    </span>
+                  )}
+                  <Link href="/learn">
+                    <Button variant="secondary" size="sm">
+                      Training Academy
+                    </Button>
+                  </Link>
+                </div>
+              ) : (
+                <SignInButton mode="modal">
+                  <Button variant="secondary" size="sm">
+                    Sign in to play
+                  </Button>
+                </SignInButton>
+              )}
             </div>
           </div>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-6">
+        {/* Auth & Gating Check */}
+        {!isSignedIn && (
+          <Alert className="mb-6 border-amber-200 bg-amber-50">
+            <AlertDescription className="flex items-center justify-between">
+              <span className="text-amber-800">
+                Sign in to track your progress and unlock scenarios by completing the Training Academy.
+              </span>
+              <SignInButton mode="modal">
+                <Button size="sm" variant="outline" className="border-amber-300 text-amber-700 hover:bg-amber-100">
+                  Sign In
+                </Button>
+              </SignInButton>
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {isSignedIn && !isPSVUnlocked && (
+          <Alert className="mb-6 border-blue-200 bg-blue-50">
+            <AlertDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="font-semibold text-blue-800">Complete PSV Basics to unlock gameplay</span>
+                  <p className="text-sm text-blue-600 mt-1">
+                    Finish the {requiredLessons.length} required lessons in the Training Academy to access scenarios.
+                  </p>
+                </div>
+                <Link href="/learn">
+                  <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+                    Go to Academy
+                  </Button>
+                </Link>
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left Column - Player Stats */}
           <div className="lg:col-span-4 space-y-4">
@@ -143,8 +232,26 @@ export default function PSVQuestLobby() {
               </CardContent>
             </Card>
 
+            {/* Coach Mode Card */}
+            {isSignedIn && isCoachModeOn && (
+              <Card className="border-amber-200 bg-amber-50">
+                <CardContent className="p-4">
+                  <div className="flex items-start gap-3">
+                    <span className="text-2xl">🎓</span>
+                    <div>
+                      <h3 className="font-semibold text-amber-800">Coach Mode Active</h3>
+                      <p className="text-xs text-amber-600 mt-1">
+                        You&apos;ll see hints, term definitions, and guided feedback during scenarios.
+                        Complete all PSV lessons to unlock Expert Mode.
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Next Mission Mini Card */}
-            {nextScenario && (
+            {isPSVUnlocked && nextScenario && (
               <Card className="border-slate-200 border-l-4 border-l-emerald-500">
                 <CardContent className="p-3">
                   <div className="flex items-center justify-between mb-2">
@@ -255,7 +362,7 @@ export default function PSVQuestLobby() {
                   {scenarios.length} missions available • {profile.completedScenarios.length} completed
                 </p>
               </div>
-              {nextScenario && (
+              {isPSVUnlocked && nextScenario && (
                 <Link href={`/psv-quest/${nextScenario.id}`}>
                   <Button 
                     size="sm" 
@@ -270,14 +377,17 @@ export default function PSVQuestLobby() {
             {/* Scenario Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
               {scenarios.map((scenario, index) => {
-                // First scenario always unlocked, others unlock after completing previous
-                const isLocked =
-                  index > 0 &&
-                  !profile.completedScenarios.includes(scenarios[index - 1].id);
+                // Check unlock status
+                const prevCompleted = index === 0 || profile.completedScenarios.includes(scenarios[index - 1].id);
+                const isLockedByProgress = index > 0 && !prevCompleted;
+                const isLockedByTraining = !isPSVUnlocked;
+                const isLocked = isLockedByTraining || isLockedByProgress;
 
-                const unlockReq = index === 0 
-                  ? ""
-                  : `Complete "${scenarios[index - 1].title}" first`;
+                const unlockReq = isLockedByTraining
+                  ? "Complete PSV training first"
+                  : index === 0 
+                    ? ""
+                    : `Complete "${scenarios[index - 1].title}" first`;
 
                 return (
                   <LevelCard
@@ -325,9 +435,11 @@ export default function PSVQuestLobby() {
           <div className="flex items-center justify-between text-xs text-slate-500">
             <div>PSV Sizing Quest – Puffer Training Platform</div>
             <div className="flex items-center gap-3">
-              <span>v1.0</span>
+              <Link href="/learn" className="hover:text-slate-700">Academy</Link>
               <span className="text-slate-300">•</span>
-              <span>For training only</span>
+              <Link href="/glossary" className="hover:text-slate-700">Glossary</Link>
+              <span className="text-slate-300">•</span>
+              <span>v1.0</span>
             </div>
           </div>
         </div>
