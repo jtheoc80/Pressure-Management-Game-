@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { AlertTriangle, Lightbulb, BookOpen, CheckCircle2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,6 +20,41 @@ interface LessonRendererProps {
   lessonId?: string;
   onQuizComplete?: (score: number, passed: boolean) => void;
   onDrillComplete?: (drillId: string, score: number, passed: boolean) => void;
+}
+
+function LessonImage({
+  src,
+  alt,
+}: {
+  src: string;
+  alt: string;
+}) {
+  const FALLBACK_SRC = "/academy/photos/placeholder.svg";
+  const [resolvedSrc, setResolvedSrc] = useState(src);
+
+  useEffect(() => {
+    setResolvedSrc(src);
+  }, [src]);
+
+  return (
+    <>
+      <Image
+        src={resolvedSrc}
+        alt={alt}
+        fill
+        className="object-cover"
+        sizes="(max-width: 768px) 100vw, 800px"
+        onError={() => {
+          if (resolvedSrc !== FALLBACK_SRC) setResolvedSrc(FALLBACK_SRC);
+        }}
+      />
+      {resolvedSrc === FALLBACK_SRC && (
+        <div className="absolute top-2 left-2 rounded-md bg-white/90 px-2 py-1 text-xs text-gray-600 shadow-sm border border-gray-200">
+          Image unavailable (showing placeholder)
+        </div>
+      )}
+    </>
+  );
 }
 
 /**
@@ -171,17 +206,7 @@ export function LessonRenderer({ sections, lessonId, onQuizComplete, onDrillComp
           <SectionWrapper key={index} index={index}>
             <figure className="my-6">
               <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-gray-200">
-                <Image
-                  src={section.src}
-                  alt={section.alt}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 100vw, 800px"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.src = "/academy/photos/placeholder.svg";
-                  }}
-                />
+                <LessonImage src={section.src} alt={section.alt} />
               </div>
               {(section.caption || section.credit) && (
                 <figcaption className="text-sm text-gray-500 text-center mt-2">

@@ -109,7 +109,7 @@ export function ScenarioBrief({ scenario, onAttachmentOpen }: ScenarioBriefProps
                     {attachment.type === "svg" ||
                     attachment.title.includes("P&ID") ? (
                       <div
-                        className="bg-white p-2"
+                        className="bg-white p-2 overflow-hidden [&>svg]:w-full [&>svg]:h-auto [&>svg]:block"
                         dangerouslySetInnerHTML={{ __html: getPidSnippet() }}
                       />
                     ) : (

@@ -75,7 +75,7 @@ export function LevelCard({
       {/* Thumbnail Section */}
       <div className="relative">
         <div
-          className="w-full h-28 bg-slate-50"
+          className="w-full h-28 bg-slate-50 overflow-hidden [&>svg]:w-full [&>svg]:h-full [&>svg]:block"
           dangerouslySetInnerHTML={{ __html: thumbnailSvg }}
         />
 

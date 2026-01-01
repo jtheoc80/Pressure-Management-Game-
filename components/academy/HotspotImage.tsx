@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import Image from "next/image";
 import { X, CheckCircle2 } from "lucide-react";
 import type { Hotspot } from "@/lib/academy/types";
@@ -25,9 +25,19 @@ export function HotspotImage({
   requiredThreshold,
   onThresholdReached,
 }: HotspotImageProps) {
+  const FALLBACK_SRC = "/academy/photos/placeholder.svg";
+  const [resolvedSrc, setResolvedSrc] = useState(imageSrc);
   const [activeHotspot, setActiveHotspot] = useState<number | null>(null);
   const [completedHotspots, setCompletedHotspots] = useState<Set<number>>(new Set());
   const thresholdReachedRef = React.useRef(false);
+
+  // If the section changes, reset image resolution + progress state.
+  useEffect(() => {
+    setResolvedSrc(imageSrc);
+    setActiveHotspot(null);
+    setCompletedHotspots(new Set());
+    thresholdReachedRef.current = false;
+  }, [imageSrc]);
 
   // Calculate threshold (default to all hotspots)
   const threshold = requiredThreshold ?? hotspots.length;
@@ -61,17 +71,25 @@ export function HotspotImage({
         {/* Image layer - POINTER-EVENTS-NONE to allow clicks through */}
         <div className="absolute inset-0 pointer-events-none">
           <Image
-            src={imageSrc}
+            src={resolvedSrc}
             alt={imageAlt}
             fill
             className="object-contain"
             sizes="(max-width: 768px) 100vw, 800px"
-            onError={(e) => {
-              const target = e.target as HTMLImageElement;
-              target.src = "/academy/photos/placeholder.svg";
+            onError={() => {
+              // next/image doesn't reliably support mutating event.target.src.
+              // Instead, swap the `src` prop to a known-safe local placeholder.
+              if (resolvedSrc !== FALLBACK_SRC) setResolvedSrc(FALLBACK_SRC);
             }}
           />
         </div>
+
+        {/* Image missing indicator (only when falling back) */}
+        {resolvedSrc === FALLBACK_SRC && (
+          <div className="absolute top-2 left-2 z-20 rounded-md bg-white/90 px-2 py-1 text-xs text-gray-600 shadow-sm border border-gray-200">
+            Image unavailable (showing placeholder)
+          </div>
+        )}
 
         {/* Hotspot markers - ABSOLUTE z-10 POINTER-EVENTS-AUTO */}
         {hotspots.map((hotspot, index) => (
