@@ -1,5 +1,6 @@
 "use client";
 
+import { useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,9 +9,15 @@ import { pidSnippets } from "@/lib/psv/svg";
 
 interface ScenarioBriefProps {
   scenario: Scenario;
+  onAttachmentOpen?: () => void;
 }
 
-export function ScenarioBrief({ scenario }: ScenarioBriefProps) {
+export function ScenarioBrief({ scenario, onAttachmentOpen }: ScenarioBriefProps) {
+  const handleTabChange = useCallback(() => {
+    if (onAttachmentOpen) {
+      onAttachmentOpen();
+    }
+  }, [onAttachmentOpen]);
 
   const getPidSnippet = () => {
     if (scenario.serviceType === "steam") return pidSnippets.steam;
@@ -76,8 +83,12 @@ export function ScenarioBrief({ scenario }: ScenarioBriefProps) {
             <h4 className="text-sm font-semibold text-[var(--puffer-navy)] mb-2">
               Reference Documents
             </h4>
-            <Tabs defaultValue={scenario.attachments[0].id} className="w-full">
-              <TabsList className="grid w-full grid-cols-2 bg-[var(--puffer-bg)]">
+            <Tabs 
+              defaultValue={scenario.attachments[0].id} 
+              className="w-full"
+              onValueChange={handleTabChange}
+            >
+              <TabsList className={`grid w-full bg-[var(--puffer-bg)] ${scenario.attachments.length === 2 ? 'grid-cols-2' : scenario.attachments.length === 3 ? 'grid-cols-3' : 'grid-cols-2'}`}>
                 {scenario.attachments.map((attachment) => (
                   <TabsTrigger
                     key={attachment.id}

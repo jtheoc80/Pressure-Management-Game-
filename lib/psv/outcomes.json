@@ -39,7 +39,17 @@
       "mw",
       "k",
       "z"
-    ]
+    ],
+    "criticalRules": [
+      {
+        "key": "WRONG_RELIEVING_CASE",
+        "when": "RELIEVING_CASE_MISMATCH",
+        "capScoreAt": 70,
+        "penaltyPoints": 30,
+        "message": "Incorrect relieving case selection is a fundamental error that affects all downstream decisions."
+      }
+    ],
+    "explanationKeywords": ["blocked", "outlet", "isolation", "boiler", "steam", "atmospheric", "conventional", "silencer", "mawp"]
   },
   {
     "scenarioId": "gas-flare-backpressure",
@@ -84,7 +94,24 @@
       "z",
       "superimposedBackpressurePsig",
       "builtUpBackpressurePsig"
-    ]
+    ],
+    "criticalRules": [
+      {
+        "key": "CONVENTIONAL_WITH_BACKPRESSURE",
+        "when": "REQUIRES_BP_AWARE_STYLE",
+        "capScoreAt": 60,
+        "penaltyPoints": 50,
+        "message": "Selecting conventional valve with variable backpressure is a critical safety error. Set pressure shift can cause catastrophic failure."
+      },
+      {
+        "key": "MISSING_BACKPRESSURE_DATA",
+        "when": "BACKPRESSURE_FIELDS_MISSING",
+        "capScoreAt": 75,
+        "penaltyPoints": 25,
+        "message": "Backpressure values not documented. Cannot verify valve selection without this critical data."
+      }
+    ],
+    "explanationKeywords": ["backpressure", "flare", "variable", "bellows", "balanced", "superimposed", "built-up", "control valve", "failure", "discharge"]
   },
   {
     "scenarioId": "liquid-thermal-expansion",
@@ -126,6 +153,233 @@
       "requiredVolFlowGpm",
       "densitySg",
       "viscosityCp"
-    ]
+    ],
+    "criticalRules": [
+      {
+        "key": "WRONG_FLOW_BASIS",
+        "when": "LIQUID_USING_MASS_FLOW",
+        "capScoreAt": 75,
+        "penaltyPoints": 20,
+        "message": "Using mass flow instead of volumetric flow for liquid service leads to incorrect sizing."
+      }
+    ],
+    "explanationKeywords": ["thermal", "expansion", "liquid", "blocked", "heat", "hydraulic", "gpm", "volumetric", "density", "viscosity"]
+  },
+  {
+    "scenarioId": "hard-psv-high-backpressure",
+    "correctRelievingCase": "fire_case",
+    "correctValveStyle": "pilot",
+    "correctOrificeLetter": "N",
+    "rationaleBullets": [
+      "Fire case is the governing scenario – external fire on vessel per API 521.",
+      "Extremely high variable backpressure (30-75 psig) can exceed 50% of set pressure.",
+      "Pilot-operated valve required when backpressure exceeds typical bellows limits (~40% of set).",
+      "Pilot valve maintains full lift regardless of backpressure variation.",
+      "Historical incident data confirms bellows failure risk at these backpressure levels.",
+      "Orifice N required to handle 85,000 lb/hr fire case load.",
+      "Always consider worst-case simultaneous relief events in flare header sizing."
+    ],
+    "commonMistakes": [
+      {
+        "key": "bellows_at_high_bp",
+        "message": "Bellows valve selected but backpressure can exceed bellows rating. Risk of bellows failure and loss of protection."
+      },
+      {
+        "key": "conventional_with_extreme_bp",
+        "message": "Conventional valve completely unsuitable for this high backpressure service. Set pressure shift would be catastrophic."
+      },
+      {
+        "key": "wrong_case_cv_failure",
+        "message": "Control valve failure selected, but scenario clearly describes external fire case per API 521."
+      },
+      {
+        "key": "undersized_for_fire",
+        "message": "Orifice undersized for fire case load. Fire relief must handle full wetted area heat input."
+      },
+      {
+        "key": "ignored_historical_incident",
+        "message": "Historical incident data ignored. Previous bellows failures should inform valve selection."
+      }
+    ],
+    "requiredFieldsForFullCredit": [
+      "relievingCase",
+      "dischargeTo",
+      "setPressurePsig",
+      "relievingTempF",
+      "serviceType",
+      "requiredMassFlowLbHr",
+      "mw",
+      "k",
+      "z",
+      "superimposedBackpressurePsig",
+      "builtUpBackpressurePsig"
+    ],
+    "criticalRules": [
+      {
+        "key": "BELLOWS_EXCEEDS_RATING",
+        "when": "REQUIRES_PILOT_FOR_HIGH_BP",
+        "capScoreAt": 50,
+        "penaltyPoints": 75,
+        "message": "CRITICAL: Bellows valve selected but backpressure exceeds bellows rating. This is a life-safety critical error."
+      },
+      {
+        "key": "CONVENTIONAL_EXTREME_BP",
+        "when": "REQUIRES_BP_AWARE_STYLE",
+        "capScoreAt": 40,
+        "penaltyPoints": 100,
+        "message": "CRITICAL: Conventional valve with extreme backpressure is a fundamental safety violation."
+      },
+      {
+        "key": "FIRE_CASE_UNDERSIZED",
+        "when": "ORIFICE_UNDERSIZED_FOR_FIRE",
+        "capScoreAt": 55,
+        "penaltyPoints": 60,
+        "message": "Undersized orifice for fire case cannot provide adequate protection during emergency."
+      }
+    ],
+    "explanationKeywords": ["fire", "case", "api", "521", "pilot", "backpressure", "bellows", "failure", "wetted", "area", "flare", "overloaded", "simultaneous", "relief", "high", "variable"]
+  },
+  {
+    "scenarioId": "hard-tank-fire-vru",
+    "correctRelievingCase": "fire_case",
+    "correctValveStyle": "conventional",
+    "correctOrificeLetter": "T",
+    "rationaleBullets": [
+      "Fire case per API 2000 – emergency venting for atmospheric tank fire exposure.",
+      "Emergency vent must bypass VRU which cannot handle fire case flows.",
+      "Atmospheric discharge requires flame arrester for flammable service.",
+      "Conventional valve acceptable – atmospheric discharge has no backpressure concerns.",
+      "Large orifice (T) required for massive fire case flow (750,000 SCFH).",
+      "Conservation vent handles normal breathing; emergency vent is for fire only.",
+      "Arrester pressure drop must be included in sizing calculations."
+    ],
+    "commonMistakes": [
+      {
+        "key": "routed_to_vru",
+        "message": "Fire case flow routed through VRU. VRU capacity is far below fire case requirement. Must vent to atmosphere."
+      },
+      {
+        "key": "no_flame_arrester",
+        "message": "Flame arrester not considered. Atmospheric discharge of flammable vapor requires arrester for ignition protection."
+      },
+      {
+        "key": "wrong_case_breathing",
+        "message": "Normal breathing case selected. Fire case is the emergency scenario requiring emergency vent sizing."
+      },
+      {
+        "key": "undersized_emergency_vent",
+        "message": "Emergency vent undersized. Must handle full API 2000 fire case flow, not normal operation."
+      },
+      {
+        "key": "ignored_arrester_dp",
+        "message": "Flame arrester pressure drop not considered. This affects available relief capacity."
+      }
+    ],
+    "requiredFieldsForFullCredit": [
+      "relievingCase",
+      "dischargeTo",
+      "setPressurePsig",
+      "relievingTempF",
+      "serviceType",
+      "requiredMassFlowLbHr",
+      "mw",
+      "k"
+    ],
+    "criticalRules": [
+      {
+        "key": "FIRE_ROUTED_TO_VRU",
+        "when": "DISCHARGE_TO_WRONG_DESTINATION",
+        "capScoreAt": 45,
+        "penaltyPoints": 80,
+        "message": "CRITICAL: Fire case routed to VRU which cannot handle emergency flows. Tank rupture risk."
+      },
+      {
+        "key": "NO_FLAME_ARRESTER",
+        "when": "ATM_DISCHARGE_NO_ARRESTER",
+        "capScoreAt": 60,
+        "penaltyPoints": 50,
+        "message": "Missing flame arrester on atmospheric discharge of flammable vapor. Fire/explosion hazard."
+      },
+      {
+        "key": "WRONG_CASE_SELECTION",
+        "when": "RELIEVING_CASE_MISMATCH",
+        "capScoreAt": 55,
+        "penaltyPoints": 55,
+        "message": "Wrong relieving case selected. Fire case is the emergency scenario, not normal breathing."
+      }
+    ],
+    "explanationKeywords": ["fire", "api", "2000", "emergency", "vent", "vru", "vapor", "recovery", "flame", "arrester", "atmospheric", "tank", "breathing", "conservation", "wetted", "area", "scfh"]
+  },
+  {
+    "scenarioId": "hard-overfill-protection",
+    "correctRelievingCase": "blocked_outlet",
+    "correctValveStyle": "conventional",
+    "correctOrificeLetter": "H",
+    "rationaleBullets": [
+      "Blocked outlet / dead-head case – pump continues running against closed system.",
+      "API 2350 Category 3 requires multiple independent protection layers.",
+      "PSV is last line of defense, not primary overfill prevention.",
+      "Liquid service uses volumetric flow (GPM) – must handle pump runout plus thermal.",
+      "Conventional valve acceptable for closed containment with minimal backpressure.",
+      "Orifice H sized for 550 GPM pump runout plus thermal contribution.",
+      "Vapor pressure data needed to assess potential flashing during relief."
+    ],
+    "commonMistakes": [
+      {
+        "key": "thermal_only",
+        "message": "Only thermal expansion considered. Must also size for pump dead-head at runout conditions."
+      },
+      {
+        "key": "sized_for_normal_rate",
+        "message": "Sized for normal transfer rate (500 GPM). Must use runout rate (550 GPM) plus thermal."
+      },
+      {
+        "key": "missing_vapor_pressure",
+        "message": "Vapor pressure not entered. Needed to evaluate flashing potential during relief."
+      },
+      {
+        "key": "psv_as_primary",
+        "message": "PSV treated as primary protection. PSV is last resort – HH alarm and HHH shutdown are primary."
+      },
+      {
+        "key": "wrong_case_thermal",
+        "message": "Thermal expansion selected. While thermal is a factor, blocked outlet (dead-head) is the governing case."
+      }
+    ],
+    "requiredFieldsForFullCredit": [
+      "relievingCase",
+      "dischargeTo",
+      "setPressurePsig",
+      "relievingTempF",
+      "serviceType",
+      "requiredVolFlowGpm",
+      "densitySg",
+      "viscosityCp",
+      "vaporPressurePsia"
+    ],
+    "criticalRules": [
+      {
+        "key": "UNDERSIZED_FOR_DEADHEAD",
+        "when": "ORIFICE_UNDERSIZED_FOR_PUMP",
+        "capScoreAt": 55,
+        "penaltyPoints": 60,
+        "message": "PSV undersized for pump dead-head. Cannot prevent overpressure if all other layers fail."
+      },
+      {
+        "key": "MISSING_VAPOR_PRESSURE",
+        "when": "LIQUID_MISSING_VAPOR_PRESSURE",
+        "capScoreAt": 70,
+        "penaltyPoints": 30,
+        "message": "Vapor pressure missing. Cannot evaluate two-phase flashing risk during relief."
+      },
+      {
+        "key": "WRONG_CASE_SELECTION",
+        "when": "RELIEVING_CASE_MISMATCH",
+        "capScoreAt": 60,
+        "penaltyPoints": 45,
+        "message": "Wrong relieving case. Blocked outlet (pump dead-head) governs, not thermal expansion alone."
+      }
+    ],
+    "explanationKeywords": ["overfill", "api", "2350", "dead-head", "pump", "runout", "shutdown", "alarm", "hh", "hhh", "level", "layer", "protection", "containment", "flashing", "vapor", "pressure"]
   }
 ]

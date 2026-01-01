@@ -9,6 +9,7 @@ import type {
   PlayerProfile,
   GradeResult,
   RankTitle,
+  HardModeProgress,
 } from "./types";
 import { getRank, BADGE_DEFINITIONS, checkBadgeEligibility } from "./scoring";
 
@@ -18,6 +19,11 @@ const STORAGE_KEYS = {
   ATTEMPTS: (id: string) => `psv:attempts:${id}`,
 } as const;
 
+const DEFAULT_HARD_MODE_PROGRESS: HardModeProgress = {
+  isUnlocked: false,
+  qualifyingAttempts: 0,
+};
+
 const DEFAULT_PROFILE: PlayerProfile = {
   xp: 0,
   rank: "Apprentice",
@@ -26,6 +32,7 @@ const DEFAULT_PROFILE: PlayerProfile = {
   completedScenarios: [],
   scenarioAttempts: {},
   scenarioBestScores: {},
+  hardModeProgress: DEFAULT_HARD_MODE_PROGRESS,
 };
 
 /**
@@ -37,7 +44,12 @@ export function getProfile(): PlayerProfile {
   try {
     const stored = localStorage.getItem(STORAGE_KEYS.PROFILE);
     if (stored) {
-      return JSON.parse(stored);
+      const profile = JSON.parse(stored);
+      // Ensure hardModeProgress exists (migration for existing profiles)
+      if (!profile.hardModeProgress) {
+        profile.hardModeProgress = DEFAULT_HARD_MODE_PROGRESS;
+      }
+      return profile;
     }
   } catch (error) {
     console.error("Error reading profile:", error);
@@ -67,8 +79,9 @@ export function updateProfileWithResult(
 ): PlayerProfile {
   const profile = getProfile();
   
-  // Update XP
-  profile.xp += result.xpAwarded;
+  // Update XP (use pointsEarned if available, fall back to xpAwarded)
+  const xpGained = result.pointsEarned ?? result.xpAwarded;
+  profile.xp += xpGained;
   
   // Update rank
   profile.rank = getRank(profile.xp);
@@ -95,6 +108,32 @@ export function updateProfileWithResult(
     (m) => !profile.mistakeBank.includes(m)
   );
   profile.mistakeBank = [...newMistakes, ...profile.mistakeBank].slice(0, 3);
+  
+  // Update hard mode progress for standard mode attempts
+  if (result.mode === "standard" || !result.mode) {
+    if (result.score >= 85) {
+      profile.hardModeProgress.qualifyingAttempts =
+        (profile.hardModeProgress.qualifyingAttempts || 0) + 1;
+    }
+    
+    // Check if hard mode should be unlocked
+    if (
+      !profile.hardModeProgress.isUnlocked &&
+      profile.hardModeProgress.qualifyingAttempts >= 3
+    ) {
+      profile.hardModeProgress.isUnlocked = true;
+      profile.hardModeProgress.unlockedAt = new Date().toISOString();
+      
+      // Award hard mode unlocked badge
+      const hardModeBadge = BADGE_DEFINITIONS.hard_mode_unlocked;
+      if (!profile.badges.some((b) => b.id === hardModeBadge.id)) {
+        profile.badges.push({
+          ...hardModeBadge,
+          earnedAt: new Date().toISOString(),
+        });
+      }
+    }
+  }
   
   // Check for new badges
   const previousResults = getAttempts(scenarioId).map((a) => ({
@@ -192,6 +231,44 @@ export function saveAttempt(
     );
   } catch (error) {
     console.error("Error saving attempt:", error);
+  }
+}
+
+/**
+ * Get the number of standard mode attempts with score >= 85
+ */
+export function getQualifyingAttemptCount(): number {
+  const profile = getProfile();
+  return profile.hardModeProgress.qualifyingAttempts || 0;
+}
+
+/**
+ * Check if hard mode is unlocked
+ */
+export function isHardModeUnlocked(): boolean {
+  const profile = getProfile();
+  return profile.hardModeProgress.isUnlocked || false;
+}
+
+/**
+ * Manually unlock hard mode (e.g., after passing qualification scenario)
+ */
+export function unlockHardMode(): void {
+  const profile = getProfile();
+  if (!profile.hardModeProgress.isUnlocked) {
+    profile.hardModeProgress.isUnlocked = true;
+    profile.hardModeProgress.unlockedAt = new Date().toISOString();
+    
+    // Award hard mode unlocked badge
+    const hardModeBadge = BADGE_DEFINITIONS.hard_mode_unlocked;
+    if (!profile.badges.some((b) => b.id === hardModeBadge.id)) {
+      profile.badges.push({
+        ...hardModeBadge,
+        earnedAt: new Date().toISOString(),
+      });
+    }
+    
+    saveProfile(profile);
   }
 }
 

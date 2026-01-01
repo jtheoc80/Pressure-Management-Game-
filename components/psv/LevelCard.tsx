@@ -10,7 +10,6 @@ import {
   getDifficultyInfo,
   getServiceInfo,
   getEstimatedTime,
-  getXPReward,
 } from "@/lib/psv/brand";
 
 interface LevelCardProps {
@@ -20,6 +19,8 @@ interface LevelCardProps {
   attemptCount?: number;
   currentXP?: number;
   unlockRequirement?: string;
+  isHardModeUnlocked?: boolean;
+  showHardBadge?: boolean;
 }
 
 export function LevelCard({
@@ -29,12 +30,13 @@ export function LevelCard({
   attemptCount = 0,
   currentXP = 0,
   unlockRequirement = "Complete the previous scenario",
+  isHardModeUnlocked = false,
+  showHardBadge = false,
 }: LevelCardProps) {
   const thumbnailSvg = getThumbnailSvg(scenario.visuals.thumbnail);
   const difficultyInfo = getDifficultyInfo(scenario.difficulty);
   const serviceInfo = getServiceInfo(scenario.serviceType);
   const estimatedTime = getEstimatedTime(scenario.difficulty);
-  const xpReward = getXPReward(scenario.difficulty);
 
   // Calculate unlock progress (example: 200 XP to unlock)
   const unlockXP = 200;
@@ -43,6 +45,24 @@ export function LevelCard({
 
   // Get relevant skills for this scenario
   const scenarioSkills = getScenarioSkills(scenario);
+
+  // Calculate estimated points based on mode
+  const getPointsDisplay = () => {
+    if (showHardBadge && scenario.isHardEligible && isHardModeUnlocked) {
+      return {
+        points: Math.round(scenario.basePoints * 0.8 * 2), // ~80% score with 2x multiplier
+        color: "text-red-600",
+        label: "~pts (2×)",
+      };
+    }
+    return {
+      points: Math.round(scenario.basePoints * 0.8), // ~80% score
+      color: "text-emerald-600",
+      label: "pts",
+    };
+  };
+
+  const pointsDisplay = getPointsDisplay();
 
   const CardContent = (
     <div
@@ -58,7 +78,14 @@ export function LevelCard({
           className="w-full h-28 bg-slate-50"
           dangerouslySetInnerHTML={{ __html: thumbnailSvg }}
         />
-        
+
+        {/* Hard Mode Badge */}
+        {scenario.isHardEligible && (
+          <div className="absolute top-2 left-2 px-1.5 py-0.5 bg-red-600 text-white text-[10px] font-bold rounded shadow-sm">
+            HARD
+          </div>
+        )}
+
         {/* Best Score Badge */}
         {bestScore !== undefined && bestScore > 0 && !isLocked && (
           <div className="absolute top-2 right-2 bg-white/95 backdrop-blur-sm rounded-full px-2 py-1 flex items-center gap-1 shadow-sm border border-slate-200">
@@ -91,7 +118,7 @@ export function LevelCard({
             </span>
             {/* Mini progress bar for unlock */}
             <div className="mt-2 w-24 h-1.5 bg-white/20 rounded-full overflow-hidden">
-              <div 
+              <div
                 className="h-full bg-white/80 rounded-full transition-all"
                 style={{ width: `${unlockProgress}%` }}
               />
@@ -137,6 +164,11 @@ export function LevelCard({
           >
             {serviceInfo.label}
           </span>
+          {scenario.isHardEligible && isHardModeUnlocked && (
+            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border bg-red-50 text-red-700 border-red-200">
+              2× Points
+            </span>
+          )}
         </div>
 
         {/* Key Constraints */}
@@ -169,13 +201,17 @@ export function LevelCard({
             <>
               <Button
                 size="sm"
-                className="h-7 px-3 text-xs bg-[#0B1F3B] hover:bg-[#12345A] text-white"
+                className={`h-7 px-3 text-xs ${
+                  showHardBadge && scenario.isHardEligible && isHardModeUnlocked
+                    ? "bg-red-600 hover:bg-red-700"
+                    : "bg-[#0B1F3B] hover:bg-[#12345A]"
+                } text-white`}
               >
                 {hasStarted ? "Continue" : "Start"}
               </Button>
               <div className="text-right">
-                <span className="text-xs font-semibold text-emerald-600">
-                  +{xpReward} XP
+                <span className={`text-xs font-semibold ${pointsDisplay.color}`}>
+                  +{pointsDisplay.points} {pointsDisplay.label}
                 </span>
                 <span className="text-xs text-slate-400 ml-1">
                   • {estimatedTime}
@@ -196,8 +232,14 @@ export function LevelCard({
     return <div className="cursor-not-allowed">{CardContent}</div>;
   }
 
+  // If hard mode unlocked and this is a hard eligible scenario in hard filter, link to hard mode
+  const linkHref =
+    showHardBadge && scenario.isHardEligible && isHardModeUnlocked
+      ? `/psv-quest/${scenario.id}?mode=hard`
+      : `/psv-quest/${scenario.id}`;
+
   return (
-    <Link href={`/psv-quest/${scenario.id}`} className="block">
+    <Link href={linkHref} className="block">
       {CardContent}
     </Link>
   );
@@ -208,18 +250,18 @@ export function LevelCard({
  */
 function getScenarioSkills(scenario: Scenario): string[] {
   const skills: string[] = ["Datasheet"];
-  
+
   if (scenario.datasheetRequirements.includes("superimposedBackpressurePsig")) {
     skills.push("Backpressure");
   }
-  
+
   skills.push("Selection");
-  
+
   if (scenario.serviceType === "liquid") {
     skills.push("Liquid");
   } else if (scenario.serviceType === "gas" || scenario.serviceType === "steam") {
     skills.push("Gas/Steam");
   }
-  
+
   return skills;
 }

@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { gradeAttempt } from "@/lib/psv/scoring";
 import { getOutcomeByScenarioId, getScenarioById } from "@/lib/psv";
-import type { PlayerAnswers, Datasheet } from "@/lib/psv/types";
+import type { PlayerAnswers, Datasheet, GradeTelemetry, PlayMode } from "@/lib/psv/types";
 
 // Request validation schema
 const gradeRequestSchema = z.object({
   scenarioId: z.string().min(1),
+  mode: z.enum(["practice", "standard", "hard"]).default("standard"),
   datasheet: z.object({
     scenarioId: z.string(),
     serviceType: z.enum(["gas", "steam", "liquid", "two_phase"]).optional(),
@@ -68,6 +69,14 @@ const gradeRequestSchema = z.object({
       "T",
     ]),
   }),
+  explanationText: z.string().optional(),
+  telemetry: z
+    .object({
+      hintsUsed: z.number().default(0),
+      attachmentsOpened: z.boolean().default(false),
+      attemptNumber: z.number().default(1),
+    })
+    .optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -86,7 +95,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { scenarioId, datasheet, answers } = parseResult.data;
+    const { scenarioId, mode, datasheet, answers, explanationText, telemetry } =
+      parseResult.data;
 
     // Get scenario
     const scenario = getScenarioById(scenarioId);
@@ -106,12 +116,41 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate hard mode access
+    if (mode === "hard" && !scenario.isHardEligible) {
+      return NextResponse.json(
+        { error: "This scenario is not available in Hard Mode" },
+        { status: 400 }
+      );
+    }
+
+    // Validate explanation text for standard and hard modes
+    if (mode === "hard" && (!explanationText || explanationText.length < 20)) {
+      return NextResponse.json(
+        {
+          error:
+            "Hard mode requires an explanation of at least 20 characters",
+        },
+        { status: 400 }
+      );
+    }
+
+    // Build telemetry with defaults
+    const gradeTelemetry: GradeTelemetry = {
+      hintsUsed: telemetry?.hintsUsed ?? 0,
+      attachmentsOpened: telemetry?.attachmentsOpened ?? false,
+      attemptNumber: telemetry?.attemptNumber ?? 1,
+    };
+
     // Grade the attempt
     const result = gradeAttempt(
       datasheet as Datasheet,
       answers as PlayerAnswers,
       outcome,
-      scenario.difficulty
+      scenario,
+      mode as PlayMode,
+      explanationText,
+      gradeTelemetry
     );
 
     // Return the result
