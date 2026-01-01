@@ -13,7 +13,9 @@ import {
   UserCheck,
   HelpCircle,
   BookOpen,
-  Scale
+  Scale,
+  Camera,
+  ImageIcon
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -227,23 +229,32 @@ function DiagramStepComponent({ step }: { step: Extract<Step, { type: "diagram" 
 
 function GalleryStepComponent({ step }: { step: Extract<Step, { type: "gallery" }> }) {
   const [activeIndex, setActiveIndex] = React.useState(0);
+  const [failedImages, setFailedImages] = React.useState<Set<number>>(new Set());
   const activeImage = step.images[activeIndex];
+
+  const handleImageError = (index: number) => {
+    setFailedImages(prev => new Set(prev).add(index));
+  };
+
+  const isImageFailed = (index: number) => failedImages.has(index);
 
   return (
     <div className="space-y-4">
       {/* Main image */}
       <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
-        <Image
-          src={activeImage.src}
-          alt={activeImage.alt}
-          fill
-          className="object-contain"
-          sizes="(max-width: 768px) 100vw, 800px"
-          onError={(e) => {
-            const target = e.target as HTMLImageElement;
-            target.src = "/academy/photos/placeholder.svg";
-          }}
-        />
+        {isImageFailed(activeIndex) ? (
+          <PlaceholderImage alt={activeImage.alt} />
+        ) : (
+          <Image
+            src={activeImage.src}
+            alt={activeImage.alt}
+            fill
+            className="object-contain"
+            sizes="(max-width: 768px) 100vw, 800px"
+            onError={() => handleImageError(activeIndex)}
+            unoptimized
+          />
+        )}
       </div>
 
       {/* Caption and credit */}
@@ -260,10 +271,13 @@ function GalleryStepComponent({ step }: { step: Extract<Step, { type: "gallery" 
 
       {/* Shot note (for placeholder guidance) */}
       {activeImage.shotNote && (
-        <div className="bg-slate-100 border border-slate-200 rounded-lg p-3">
-          <p className="text-xs text-slate-500">
-            <span className="font-medium">Photo needed:</span> {activeImage.shotNote}
-          </p>
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+          <div className="flex items-start gap-2">
+            <Camera className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+            <p className="text-xs text-amber-700">
+              <span className="font-medium">Photo needed:</span> {activeImage.shotNote}
+            </p>
+          </div>
         </div>
       )}
 
@@ -280,21 +294,38 @@ function GalleryStepComponent({ step }: { step: Extract<Step, { type: "gallery" 
                   : "border-slate-200 hover:border-slate-300"
               }`}
             >
-              <Image
-                src={img.src}
-                alt={img.alt}
-                fill
-                className="object-cover"
-                sizes="64px"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.src = "/academy/photos/placeholder.svg";
-                }}
-              />
+              {isImageFailed(idx) ? (
+                <div className="w-full h-full bg-slate-200 flex items-center justify-center">
+                  <ImageIcon className="w-4 h-4 text-slate-400" />
+                </div>
+              ) : (
+                <Image
+                  src={img.src}
+                  alt={img.alt}
+                  fill
+                  className="object-cover"
+                  sizes="64px"
+                  onError={() => handleImageError(idx)}
+                  unoptimized
+                />
+              )}
             </button>
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+/** Placeholder component for missing images */
+function PlaceholderImage({ alt }: { alt: string }) {
+  return (
+    <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-100">
+      <div className="w-20 h-16 border-2 border-dashed border-slate-300 rounded-lg flex items-center justify-center mb-3">
+        <ImageIcon className="w-8 h-8 text-slate-400" />
+      </div>
+      <p className="text-sm text-slate-500 font-medium">Photo Placeholder</p>
+      <p className="text-xs text-slate-400 mt-1 max-w-[200px] text-center">{alt}</p>
     </div>
   );
 }

@@ -248,7 +248,38 @@ const lesson1: Lesson = {
         "What happens at 110% of MAWP during a fire case?"
       ]
     },
-    // Step 4: Field Walkdown
+    // Step 4: Gallery - PSVs in the Field
+    {
+      type: "gallery",
+      title: "PSVs in the Field: What They Actually Look Like",
+      images: [
+        {
+          src: "/academy/photos/psv/psv-vessel-mounted.jpg",
+          alt: "PSV mounted on top of a pressure vessel",
+          caption: "PSV mounted on vessel top head - note the inlet nozzle and discharge elbow",
+          shotNote: "Full shot of a PSV installed on a vessel top head, showing the bonnet, body, test lever, and discharge piping connection"
+        },
+        {
+          src: "/academy/photos/psv/nameplate-closeup.jpg",
+          alt: "PSV nameplate showing set pressure and orifice size",
+          caption: "PSV nameplate - always verify set pressure matches documentation",
+          shotNote: "Close-up of a PSV nameplate clearly showing: SET PRESSURE (psig), ORIFICE DESIGNATION (letter), CDTP, and ASME UV stamp"
+        },
+        {
+          src: "/academy/photos/psv/discharge-to-flare.jpg",
+          alt: "PSV discharge piping routed to flare header",
+          caption: "Discharge piping routed to flare header - typical closed system discharge",
+          shotNote: "PSV discharge elbow connecting to flare header piping, showing proper support and no pockets where liquid could accumulate"
+        },
+        {
+          src: "/academy/photos/psv/inlet-block-cso.jpg",
+          alt: "Inlet block valve with car seal open tag",
+          caption: "Inlet block valve with CSO (Car Seal Open) tag - this valve must remain open",
+          shotNote: "Close-up of inlet block valve with CSO tag visible, showing the valve is locked in open position to ensure PSV is not isolated"
+        }
+      ]
+    },
+    // Step 5: Field Walkdown (renumbered from 4)
     {
       type: "fieldwalkdown",
       title: "Field Walkdown: Identifying PSVs in the Plant",
@@ -272,7 +303,7 @@ const lesson1: Lesson = {
         "Missing or illegible nameplate"
       ]
     },
-    // Step 5: Decision Checklist
+    // Step 6: Decision Checklist (renumbered from 5)
     {
       type: "explain",
       title: "Decision Checklist: When Do I Need a PSV?",
@@ -297,7 +328,7 @@ const lesson1: Lesson = {
         "Not considering fire case for vessels in a fire zone"
       ]
     },
-    // Step 6: Rule Card
+    // Step 7: Rule Card (renumbered from 6)
     {
       type: "rule",
       title: "API 520/521: The Governing Standards",
@@ -306,7 +337,7 @@ const lesson1: Lesson = {
       sourceLabel: "API 520 Part I, Section 1.1",
       sourceNote: "ASME Section VIII also applies for pressure vessel certification."
     },
-    // Step 7: Common Wrong Moves
+    // Step 8: Common Wrong Moves (renumbered from 7)
     {
       type: "explain",
       title: "Common Wrong Moves: What Gets People in Trouble",
@@ -328,13 +359,13 @@ const lesson1: Lesson = {
         "If operators complain about 'nuisance' PSV lifts, investigate the root cause"
       ]
     },
-    // Step 8: Mini-Drill
+    // Step 9: Mini-Drill (renumbered from 8)
     {
       type: "drill",
       title: "Mini-Drill: PSV Fundamentals",
       drillId: "drill-m1-l1"
     },
-    // Step 9: Supervisor Check
+    // Step 10: Supervisor Check (renumbered from 9)
     {
       type: "supervisorcheck",
       title: "Supervisor Check: What a Senior Engineer Reviews",
@@ -351,17 +382,17 @@ const lesson1: Lesson = {
         "If discharging to flare, check if bellows or pilot valve is needed for backpressure"
       ]
     },
-    // Step 10: Confidence Check
+    // Step 11: Confidence Check (renumbered from 10)
     {
       type: "confidence",
       title: "Confidence Check",
       prompt: "Before moving to the quiz, rate your confidence: Can you explain why a PSV is the 'last line of defense' and not a process control device?",
       actionsIfLow: [
         { label: "Review the Plant Reality step", goToStepIndex: 0 },
-        { label: "Review Common Wrong Moves", goToStepIndex: 6 }
+        { label: "Review Common Wrong Moves", goToStepIndex: 8 }
       ]
     },
-    // Step 11: Quiz
+    // Step 12: Quiz (renumbered from 11)
     {
       type: "quiz",
       title: "Quiz: What is Pressure Relief?",

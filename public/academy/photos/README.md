@@ -36,6 +36,14 @@ photos/
 
 ## MODULE 1 SHOT LIST (Priority)
 
+### Lesson 1: What is Pressure Relief?
+| File Path | Shot Description |
+|-----------|------------------|
+| `psv/psv-vessel-mounted.jpg` | Full shot of a PSV installed on a vessel top head, showing the bonnet, body, test lever, and discharge piping connection |
+| `psv/nameplate-closeup.jpg` | Close-up of a PSV nameplate clearly showing: SET PRESSURE (psig), ORIFICE DESIGNATION (letter), CDTP, and ASME UV stamp |
+| `psv/discharge-to-flare.jpg` | PSV discharge elbow connecting to flare header piping, showing proper support and no pockets where liquid could accumulate |
+| `psv/inlet-block-cso.jpg` | Close-up of inlet block valve with CSO (Car Seal Open) tag visible, showing the valve is locked in open position |
+
 ### Lesson 2: Pressure & Temperature Units
 | File Path | Shot Description |
 |-----------|------------------|

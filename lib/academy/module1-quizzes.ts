@@ -84,7 +84,7 @@ export const module1Quizzes: Quiz[] = [
         ],
         correctIndex: 1,
         explanation: "API 520 covers sizing and selection, API 521 covers disposal systems, and ASME Section VIII governs pressure vessel certification.",
-        remediationStepIndex: 5,
+        remediationStepIndex: 6,
         remediationLabel: "Review Rule Card"
       },
       {
@@ -98,7 +98,7 @@ export const module1Quizzes: Quiz[] = [
         ],
         correctIndex: 1,
         explanation: "A partially closed inlet block valve may isolate the PSV from the protected equipment, defeating its protective function.",
-        remediationStepIndex: 3,
+        remediationStepIndex: 4,
         remediationLabel: "Review Field Walkdown"
       }
     ]

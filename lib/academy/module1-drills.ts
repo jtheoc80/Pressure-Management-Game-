@@ -102,7 +102,7 @@ export const module1Drills: Drill[] = [
         correctIndex: 1,
         hint: "What happens if the PSV can't sense system pressure?",
         explanation: "A partially or fully closed inlet block valve can isolate the PSV from the protected equipment, defeating its protective function. This is a critical safety finding.",
-        remediationStepIndex: 3,
+        remediationStepIndex: 4,
         remediationLabel: "Review Field Walkdown"
       },
       {
@@ -117,7 +117,7 @@ export const module1Drills: Drill[] = [
         correctIndex: 1,
         hint: "PSVs should rarely lift during normal operations",
         explanation: "Using a PSV as a process control device causes excessive wear, seat damage, and potential failure when actually needed. PSVs should only lift during upsets.",
-        remediationStepIndex: 6,
+        remediationStepIndex: 8,
         remediationLabel: "Review Common Wrong Moves"
       }
     ]
