@@ -1,12 +1,17 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { useSafeUser } from "@/lib/auth";
+
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+
 import {
   ScenarioBrief,
   DatasheetForm,
@@ -16,7 +21,10 @@ import {
   ValveCutaway,
   OrificeWheel,
 } from "@/components/psv";
+
 import { ModeSelector } from "@/components/psv/ModeSelector";
+import { GlossaryTooltip } from "@/components/academy/GlossaryTooltip";
+
 import {
   getScenarioById,
   getDatasheet,
@@ -25,6 +33,7 @@ import {
   getProfile,
   getAttempts,
 } from "@/lib/psv";
+
 import type {
   Datasheet,
   PlayerAnswers,
@@ -33,12 +42,35 @@ import type {
   PlayMode,
   GradeTelemetry,
 } from "@/lib/psv/types";
+import type { UserProgress } from "@/lib/academy/types";
 
-export default function GameplayPage() {
-  const params = useParams();
+type PageProps = { params: { id: string } };
+
+// Coach mode hints for different steps
+const coachHints: Record<string, { title: string; hint: string }> = {
+  relievingCase: {
+    title: "Identifying the Relieving Case",
+    hint: "Read the scenario constraints carefully. Look for keywords like 'blocked outlet', 'fire case', 'thermal expansion', or 'control valve failure'. The relieving case determines what flow rate and conditions the PSV must handle.",
+  },
+  valveStyle: {
+    title: "Selecting Valve Style",
+    hint: "Consider the discharge destination and backpressure conditions. Use CONVENTIONAL for atmospheric discharge or low BP (<10%). Use BELLOWS for variable backpressure (like flare headers). Use PILOT for very high BP or when tight shutoff is critical.",
+  },
+  orificeLetter: {
+    title: "Choosing Orifice Size",
+    hint: "The orifice must be large enough to pass the required relief flow. In real applications, you'd calculate the required area and select the next larger standard orifice. For this training, consider the flow rate and service conditions.",
+  },
+  datasheet: {
+    title: "Completing the Datasheet",
+    hint: "The datasheet documents all information needed for PSV specification. Make sure to include: set pressure (typically at MAWP), relieving temperature, required flow rate, and all relevant fluid properties for your service type.",
+  },
+};
+
+export default function GameplayPage({ params }: PageProps) {
+  const scenarioId = params.id;
   const router = useRouter();
   const searchParams = useSearchParams();
-  const scenarioId = params.id as string;
+  const { isSignedIn } = useSafeUser();
 
   const [scenario, setScenario] = useState<Scenario | null>(null);
   const [datasheet, setDatasheet] = useState<Partial<Datasheet>>({});
@@ -46,6 +78,9 @@ export default function GameplayPage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [academyProgress, setAcademyProgress] = useState<UserProgress | null>(null);
+  const [coachModeEnabled, setCoachModeEnabled] = useState(true);
+  const [showCoachHint, setShowCoachHint] = useState<string | null>("datasheet");
 
   // New state for enhanced features
   const [mode, setMode] = useState<PlayMode>("standard");
@@ -88,6 +123,26 @@ export default function GameplayPage() {
     }
   }, [scenarioId, searchParams]);
 
+  // Load academy progress for coach mode setting
+  useEffect(() => {
+    async function loadProgress() {
+      if (isSignedIn) {
+        try {
+          const res = await fetch("/api/progress/get");
+          if (res.ok) {
+            const data = await res.json();
+            setAcademyProgress(data);
+            // Coach mode is ON by default, OFF only if user has unlocked it
+            setCoachModeEnabled(!data.unlocks.coach_mode_off);
+          }
+        } catch (error) {
+          console.error("Failed to load progress:", error);
+        }
+      }
+    }
+    loadProgress();
+  }, [isSignedIn]);
+
   // Auto-save datasheet changes
   const handleDatasheetChange = useCallback(
     (newDatasheet: Partial<Datasheet>) => {
@@ -101,6 +156,17 @@ export default function GameplayPage() {
   const handleAnswerChange = useCallback(
     (newAnswers: Partial<PlayerAnswers>) => {
       setAnswers(newAnswers);
+      
+      // Update coach hint based on current step
+      if (!newAnswers.relievingCase) {
+        setShowCoachHint("relievingCase");
+      } else if (!newAnswers.valveStyle) {
+        setShowCoachHint("valveStyle");
+      } else if (!newAnswers.orificeLetter) {
+        setShowCoachHint("orificeLetter");
+      } else {
+        setShowCoachHint(null);
+      }
     },
     []
   );
@@ -207,6 +273,8 @@ export default function GameplayPage() {
     }
   };
 
+  const currentHint = coachModeEnabled && showCoachHint ? coachHints[showCoachHint] : null;
+
   return (
     <div className="min-h-screen bg-[var(--puffer-bg)]">
       {/* Header */}
@@ -234,6 +302,7 @@ export default function GameplayPage() {
                   <h1 className="font-semibold text-[var(--puffer-navy)]">
                     {scenario.title}
                   </h1>
+
                   {mode === "hard" && (
                     <span className="px-2 py-0.5 bg-red-100 text-red-700 text-xs font-bold rounded">
                       HARD
@@ -244,6 +313,12 @@ export default function GameplayPage() {
                       PRACTICE
                     </span>
                   )}
+
+                  {coachModeEnabled && (
+                    <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 text-xs">
+                      🎓 Coach Mode
+                    </Badge>
+                  )}
                 </div>
                 <p className="text-xs text-[var(--puffer-gray)]">
                   Level {scenario.difficulty} •{" "}
@@ -253,6 +328,21 @@ export default function GameplayPage() {
               </div>
             </div>
             <div className="flex items-center gap-4">
+              {/* Coach Mode Toggle */}
+              {academyProgress?.unlocks.coach_mode_off && (
+                <button
+                  onClick={() => setCoachModeEnabled(!coachModeEnabled)}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs transition-colors border"
+                  style={{
+                    backgroundColor: coachModeEnabled ? "#FEF3C7" : "transparent",
+                    borderColor: coachModeEnabled ? "#FCD34D" : "#D1D5DB",
+                    color: coachModeEnabled ? "#92400E" : "#6B7280",
+                  }}
+                >
+                  <span>{coachModeEnabled ? "🎓" : "👤"}</span>
+                  <span>{coachModeEnabled ? "Coach Mode" : "Expert Mode"}</span>
+                </button>
+              )}
               <div className="text-right">
                 <div className="text-xs text-[var(--puffer-gray)]">
                   Datasheet Complete
@@ -282,6 +372,31 @@ export default function GameplayPage() {
         </div>
       )}
 
+      {/* Coach Mode Hint */}
+      {coachModeEnabled && currentHint && (
+        <div className="max-w-7xl mx-auto px-4 pt-4">
+          <Card className="border-amber-200 bg-amber-50">
+            <CardContent className="p-4">
+              <div className="flex items-start gap-3">
+                <span className="text-2xl">🎓</span>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-amber-800">{currentHint.title}</h3>
+                    <button
+                      onClick={() => setShowCoachHint(null)}
+                      className="text-amber-600 hover:text-amber-800 text-sm"
+                    >
+                      Dismiss
+                    </button>
+                  </div>
+                  <p className="text-sm text-amber-700 mt-1">{currentHint.hint}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -296,9 +411,10 @@ export default function GameplayPage() {
               basePoints={scenario.basePoints}
             />
 
-            {/* Scenario Brief */}
-            <ScenarioBrief
-              scenario={scenario}
+            {/* Scenario Brief with Glossary Terms */}
+            <ScenarioBriefWithTooltips 
+              scenario={scenario} 
+              coachMode={coachModeEnabled}
               onAttachmentOpen={handleAttachmentOpen}
             />
 
@@ -443,7 +559,10 @@ export default function GameplayPage() {
                         : "text-[var(--puffer-gray)]"
                     }
                   >
-                    Relieving case selected
+                    <GlossaryTooltip term="Relieving Case">
+                      Relieving case
+                    </GlossaryTooltip>{" "}
+                    selected
                   </span>
                 </li>
                 <li className="flex items-center gap-2 text-sm">
@@ -483,7 +602,7 @@ export default function GameplayPage() {
                         : "text-[var(--puffer-gray)]"
                     }
                   >
-                    Orifice letter selected
+                    <GlossaryTooltip term="Orifice">Orifice letter</GlossaryTooltip> selected
                   </span>
                 </li>
                 {mode === "hard" && (
@@ -550,9 +669,44 @@ export default function GameplayPage() {
                 </div>
               </div>
             )}
+
+            {/* Quick Glossary Access */}
+            {coachModeEnabled && (
+              <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="text-sm font-semibold text-slate-700">Need Help?</h4>
+                  <Link href="/glossary" target="_blank">
+                    <Button variant="ghost" size="sm" className="text-xs h-7">
+                      Full Glossary →
+                    </Button>
+                  </Link>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {["MAWP", "Set Pressure", "Backpressure", "Orifice"].map((term) => (
+                    <GlossaryTooltip key={term} term={term}>
+                      <span className="px-2 py-1 bg-white border border-slate-200 rounded text-xs text-slate-600 cursor-help hover:border-blue-300">
+                        {term}
+                      </span>
+                    </GlossaryTooltip>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </main>
     </div>
   );
+}
+
+// Enhanced scenario brief with glossary tooltips
+interface ScenarioBriefWithTooltipsProps {
+  scenario: Scenario;
+  coachMode: boolean;
+  onAttachmentOpen?: () => void;
+}
+
+function ScenarioBriefWithTooltips({ scenario, onAttachmentOpen }: ScenarioBriefWithTooltipsProps) {
+  // Placeholder for future term highlighting - just render scenario brief for now
+  return <ScenarioBrief scenario={scenario} onAttachmentOpen={onAttachmentOpen} />;
 }
