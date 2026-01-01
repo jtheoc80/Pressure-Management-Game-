@@ -1,30 +1,77 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import type { Quiz as QuizType } from "@/lib/academy/types";
+import { Badge } from "@/components/ui/badge";
+import { Target, RotateCcw, Focus, BookOpen } from "lucide-react";
+import { getQuizById } from "@/lib/academy/quizzes";
+import { getLessonById } from "@/lib/academy/lessons";
+import type { Quiz as QuizType, QuizQuestion } from "@/lib/academy/types";
 
 interface QuizProps {
-  quiz: QuizType;
-  onComplete: (score: number, passed: boolean) => void;
+  quizId?: string;
+  quiz?: QuizType;
+  onComplete?: (score: number, passed: boolean, weakObjectives?: number[]) => void;
   bestScore?: number;
+  drillCompleted?: boolean;
+  drillRequired?: boolean;
 }
 
-export function Quiz({ quiz, onComplete, bestScore }: QuizProps) {
+export function Quiz({ quizId, quiz: quizProp, onComplete, bestScore, drillCompleted = true, drillRequired = false }: QuizProps) {
+  const quiz = quizProp || (quizId ? getQuizById(quizId) : undefined);
+  const lesson = quiz ? getLessonById(quiz.lessonId) : undefined;
+
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, number>>({});
   const [showResults, setShowResults] = useState(false);
   const [showExplanation, setShowExplanation] = useState(false);
+  const [focusMode, setFocusMode] = useState(false);
+  const [focusQuestions, setFocusQuestions] = useState<QuizQuestion[]>([]);
 
-  const currentQuestion = quiz.questions[currentQuestionIndex];
-  const totalQuestions = quiz.questions.length;
+  // Calculate weak objectives from previous attempts
+  const [previousWeakObjectives, setPreviousWeakObjectives] = useState<number[]>([]);
+
+  if (!quiz) {
+    return (
+      <Card className="border-amber-200 bg-amber-50">
+        <CardContent className="p-4">
+          <p className="text-amber-700">Quiz not found: {quizId}</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Check if drill is required but not completed
+  if (drillRequired && !drillCompleted) {
+    return (
+      <Card className="border-slate-200">
+        <CardContent className="p-6 text-center">
+          <div className="p-3 bg-violet-100 rounded-full w-fit mx-auto mb-4">
+            <Target className="w-6 h-6 text-violet-700" />
+          </div>
+          <h3 className="font-semibold text-lg text-slate-800 mb-2">Complete the Drill First</h3>
+          <p className="text-slate-600 text-sm mb-4">
+            You need to complete the practice drill before taking this quiz. 
+            The drill helps ensure you&apos;re ready for the quiz questions.
+          </p>
+          <Badge variant="secondary" className="bg-violet-100 text-violet-700">
+            Scroll up to find the drill section
+          </Badge>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const activeQuestions = focusMode ? focusQuestions : quiz.questions;
+  const currentQuestion = activeQuestions[currentQuestionIndex];
+  const totalQuestions = activeQuestions.length;
   const answeredCount = Object.keys(selectedAnswers).length;
   const progress = (answeredCount / totalQuestions) * 100;
 
   const handleSelectAnswer = (optionIndex: number) => {
-    if (showExplanation) return; // Can't change after seeing explanation
+    if (showExplanation) return;
     
     setSelectedAnswers((prev) => ({
       ...prev,
@@ -38,24 +85,55 @@ export function Quiz({ quiz, onComplete, bestScore }: QuizProps) {
     if (currentQuestionIndex < totalQuestions - 1) {
       setCurrentQuestionIndex((prev) => prev + 1);
     } else {
-      // Calculate final score
       calculateAndShowResults();
     }
   };
 
   const calculateAndShowResults = () => {
     let correctCount = 0;
-    quiz.questions.forEach((q) => {
+    const weakObjectives: number[] = [];
+    
+    activeQuestions.forEach((q) => {
       if (selectedAnswers[q.id] === q.correctIndex) {
         correctCount++;
+      } else if (q.objectiveIndex !== undefined && !weakObjectives.includes(q.objectiveIndex)) {
+        weakObjectives.push(q.objectiveIndex);
       }
     });
+    
     const score = Math.round((correctCount / totalQuestions) * 100);
     setShowResults(true);
-    onComplete(score, score >= quiz.passingScore);
+    setPreviousWeakObjectives(weakObjectives);
+    onComplete?.(score, score >= quiz.passingScore, weakObjectives);
   };
 
   const handleRetry = () => {
+    setCurrentQuestionIndex(0);
+    setSelectedAnswers({});
+    setShowResults(false);
+    setShowExplanation(false);
+    setFocusMode(false);
+    setFocusQuestions([]);
+  };
+
+  const handleRetakeWithFocus = () => {
+    // Get questions from weak objective areas
+    const weakQuestions = quiz.questions.filter(
+      (q) => q.objectiveIndex !== undefined && previousWeakObjectives.includes(q.objectiveIndex)
+    );
+    
+    if (weakQuestions.length > 0) {
+      setFocusQuestions(weakQuestions);
+      setFocusMode(true);
+    } else {
+      // If no objective-linked questions, just retry missed questions
+      const missedQuestions = quiz.questions.filter(
+        (q) => selectedAnswers[q.id] !== q.correctIndex
+      );
+      setFocusQuestions(missedQuestions.length > 0 ? missedQuestions : quiz.questions);
+      setFocusMode(true);
+    }
+    
     setCurrentQuestionIndex(0);
     setSelectedAnswers({});
     setShowResults(false);
@@ -64,7 +142,7 @@ export function Quiz({ quiz, onComplete, bestScore }: QuizProps) {
 
   const getScore = () => {
     let correctCount = 0;
-    quiz.questions.forEach((q) => {
+    activeQuestions.forEach((q) => {
       if (selectedAnswers[q.id] === q.correctIndex) {
         correctCount++;
       }
@@ -75,11 +153,15 @@ export function Quiz({ quiz, onComplete, bestScore }: QuizProps) {
   if (showResults) {
     const score = getScore();
     const passed = score >= quiz.passingScore;
+    const missedQuestions = activeQuestions.filter((q) => selectedAnswers[q.id] !== q.correctIndex);
 
     return (
       <Card className="border-slate-200">
         <CardHeader className="pb-4">
-          <CardTitle className="text-lg">Quiz Results</CardTitle>
+          <CardTitle className="text-lg flex items-center gap-2">
+            Quiz Results
+            {focusMode && <Badge variant="secondary">Focus Mode</Badge>}
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className={`text-center p-6 rounded-lg ${passed ? "bg-emerald-50" : "bg-amber-50"}`}>
@@ -100,10 +182,28 @@ export function Quiz({ quiz, onComplete, bestScore }: QuizProps) {
             </div>
           )}
 
+          {/* Weak Areas Feedback */}
+          {!passed && lesson && previousWeakObjectives.length > 0 && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h4 className="font-semibold text-sm text-blue-800 flex items-center gap-2 mb-2">
+                <BookOpen className="w-4 h-4" />
+                Review These Areas
+              </h4>
+              <ul className="text-sm text-blue-700 space-y-1">
+                {previousWeakObjectives.map((objIdx) => (
+                  <li key={objIdx} className="flex items-start gap-2">
+                    <span className="text-blue-400">•</span>
+                    {lesson.objectives[objIdx]}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           {/* Question Review */}
           <div className="space-y-3 pt-4 border-t">
             <h4 className="font-semibold text-sm text-slate-700">Review Answers</h4>
-            {quiz.questions.map((q, idx) => {
+            {activeQuestions.map((q, idx) => {
               const userAnswer = selectedAnswers[q.id];
               const isCorrect = userAnswer === q.correctIndex;
               return (
@@ -134,10 +234,17 @@ export function Quiz({ quiz, onComplete, bestScore }: QuizProps) {
           </div>
 
           {!passed && (
-            <div className="pt-4">
-              <Button onClick={handleRetry} variant="outline" className="w-full">
+            <div className="flex gap-3 pt-4">
+              <Button onClick={handleRetry} variant="outline" className="flex-1">
+                <RotateCcw className="w-4 h-4 mr-2" />
                 Try Again
               </Button>
+              {missedQuestions.length > 0 && missedQuestions.length < activeQuestions.length && (
+                <Button onClick={handleRetakeWithFocus} variant="outline" className="flex-1">
+                  <Focus className="w-4 h-4 mr-2" />
+                  Focus on Weak Areas
+                </Button>
+              )}
             </div>
           )}
         </CardContent>
@@ -152,9 +259,12 @@ export function Quiz({ quiz, onComplete, bestScore }: QuizProps) {
     <Card className="border-slate-200">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between mb-2">
-          <CardTitle className="text-sm font-medium text-slate-600">
-            {quiz.title}
-          </CardTitle>
+          <div className="flex items-center gap-2">
+            <CardTitle className="text-sm font-medium text-slate-600">
+              {quiz.title}
+            </CardTitle>
+            {focusMode && <Badge variant="secondary" className="text-xs">Focus Mode</Badge>}
+          </div>
           <span className="text-xs text-slate-500">
             Question {currentQuestionIndex + 1} of {totalQuestions}
           </span>
