@@ -8,12 +8,12 @@ import { Progress } from "@/components/ui/progress";
 import { LevelCard } from "@/components/psv/LevelCard";
 import { CompetencyBars } from "@/components/psv/CompetencyBars";
 import { scenarios, getProfile, getRankProgress } from "@/lib/psv";
-import { getXPReward } from "@/lib/psv/brand";
 import type { PlayerProfile, Scenario } from "@/lib/psv/types";
 
 export default function PSVQuestLobby() {
   const [profile, setProfile] = useState<PlayerProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showHardOnly, setShowHardOnly] = useState(false);
 
   useEffect(() => {
     const loadProfile = () => {
@@ -32,6 +32,15 @@ export default function PSVQuestLobby() {
   }
 
   const rankProgress = getRankProgress(profile.xp);
+  const isHardModeUnlocked = profile.hardModeProgress?.isUnlocked || false;
+  const qualifyingAttempts = profile.hardModeProgress?.qualifyingAttempts || 0;
+
+  // Filter scenarios
+  const displayedScenarios = showHardOnly
+    ? scenarios.filter((s) => s.isHardEligible)
+    : scenarios;
+
+  const hardEligibleCount = scenarios.filter((s) => s.isHardEligible).length;
 
   // Find the next recommended scenario
   const getNextScenario = (): Scenario | null => {
@@ -106,13 +115,13 @@ export default function PSVQuestLobby() {
                     <div className="text-xs text-white/60">Total XP</div>
                   </div>
                 </div>
-                
+
                 {/* XP Progress */}
                 <div className="mt-3">
                   <div className="flex justify-between text-xs mb-1">
                     <span className="text-white/60">Progress</span>
                     <span className="text-white/80">
-                      {rankProgress.nextRank 
+                      {rankProgress.nextRank
                         ? `${rankProgress.xpForNext - profile.xp} XP to ${rankProgress.nextRank}`
                         : "Max rank achieved!"}
                     </span>
@@ -123,7 +132,7 @@ export default function PSVQuestLobby() {
                   />
                 </div>
               </div>
-              
+
               {/* Stats Row */}
               <CardContent className="p-3">
                 <div className="grid grid-cols-2 gap-3">
@@ -143,6 +152,67 @@ export default function PSVQuestLobby() {
               </CardContent>
             </Card>
 
+            {/* Hard Mode Progress Card */}
+            <Card
+              className={`border-slate-200 ${
+                isHardModeUnlocked
+                  ? "border-l-4 border-l-red-500"
+                  : "border-l-4 border-l-amber-500"
+              }`}
+            >
+              <CardContent className="p-3">
+                {isHardModeUnlocked ? (
+                  <>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-semibold text-red-600 uppercase tracking-wide flex items-center gap-1">
+                        <span>🔓</span> Hard Mode Unlocked
+                      </span>
+                      <span className="text-xs text-red-500 font-bold">2X POINTS</span>
+                    </div>
+                    <p className="text-xs text-slate-600 mb-2">
+                      Challenge yourself with {hardEligibleCount} Hard-eligible
+                      scenarios for double points and stricter rules.
+                    </p>
+                    <Button
+                      size="sm"
+                      variant={showHardOnly ? "default" : "outline"}
+                      className={`w-full h-8 text-xs ${
+                        showHardOnly
+                          ? "bg-red-600 hover:bg-red-700 text-white"
+                          : "border-red-200 text-red-600 hover:bg-red-50"
+                      }`}
+                      onClick={() => setShowHardOnly(!showHardOnly)}
+                    >
+                      {showHardOnly ? "Show All Scenarios" : "Show Hard Mode Only"}
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-semibold text-amber-600 uppercase tracking-wide flex items-center gap-1">
+                        <span>🔒</span> Hard Mode Locked
+                      </span>
+                      <span className="text-xs text-amber-500">
+                        {qualifyingAttempts}/3
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-600 mb-2">
+                      Score ≥85 on 3 standard mode attempts to unlock Hard Mode
+                      with 2× point rewards.
+                    </p>
+                    <Progress
+                      value={(qualifyingAttempts / 3) * 100}
+                      className="h-2"
+                    />
+                    <p className="text-[10px] text-slate-400 mt-1">
+                      {3 - qualifyingAttempts} more qualifying score
+                      {3 - qualifyingAttempts !== 1 ? "s" : ""} needed
+                    </p>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+
             {/* Next Mission Mini Card */}
             {nextScenario && (
               <Card className="border-slate-200 border-l-4 border-l-emerald-500">
@@ -151,9 +221,16 @@ export default function PSVQuestLobby() {
                     <span className="text-xs font-semibold text-emerald-600 uppercase tracking-wide">
                       Recommended Next
                     </span>
-                    <span className="text-xs text-slate-400">
-                      +{getXPReward(nextScenario.difficulty)} XP
-                    </span>
+                    <div className="flex items-center gap-1">
+                      {nextScenario.isHardEligible && isHardModeUnlocked && (
+                        <span className="px-1.5 py-0.5 bg-red-100 text-red-600 text-[10px] font-bold rounded">
+                          HARD
+                        </span>
+                      )}
+                      <span className="text-xs text-slate-400">
+                        +{nextScenario.basePoints} pts
+                      </span>
+                    </div>
                   </div>
                   <h4 className="font-semibold text-slate-800 text-sm mb-1 line-clamp-1">
                     {nextScenario.title}
@@ -162,8 +239,8 @@ export default function PSVQuestLobby() {
                     {nextScenario.description}
                   </p>
                   <Link href={`/psv-quest/${nextScenario.id}`}>
-                    <Button 
-                      size="sm" 
+                    <Button
+                      size="sm"
                       className="w-full h-8 bg-emerald-600 hover:bg-emerald-700 text-white text-xs"
                     >
                       Start Mission
@@ -181,8 +258,8 @@ export default function PSVQuestLobby() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="px-4 pb-4">
-                <CompetencyBars 
-                  badges={profile.badges} 
+                <CompetencyBars
+                  badges={profile.badges}
                   completedScenarios={profile.completedScenarios}
                 />
               </CardContent>
@@ -205,7 +282,9 @@ export default function PSVQuestLobby() {
                         title={badge.description}
                       >
                         <span>{badge.icon}</span>
-                        <span className="font-medium text-slate-700">{badge.name}</span>
+                        <span className="font-medium text-slate-700">
+                          {badge.name}
+                        </span>
                       </div>
                     ))}
                   </div>
@@ -218,7 +297,14 @@ export default function PSVQuestLobby() {
               <Card className="border-amber-200 bg-amber-50">
                 <CardHeader className="pb-2 pt-3 px-4">
                   <CardTitle className="text-sm font-semibold text-amber-800 flex items-center gap-2">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
                       <circle cx="12" cy="12" r="10" />
                       <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
                       <line x1="12" y1="17" x2="12.01" y2="17" />
@@ -249,35 +335,58 @@ export default function PSVQuestLobby() {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-lg font-semibold text-slate-800">
-                  Training Scenarios
+                  {showHardOnly ? "Hard Mode Scenarios" : "Training Scenarios"}
                 </h2>
                 <p className="text-xs text-slate-500">
-                  {scenarios.length} missions available • {profile.completedScenarios.length} completed
+                  {showHardOnly
+                    ? `${hardEligibleCount} hard scenarios • 2× points`
+                    : `${scenarios.length} missions available • ${profile.completedScenarios.length} completed`}
                 </p>
               </div>
-              {nextScenario && (
-                <Link href={`/psv-quest/${nextScenario.id}`}>
-                  <Button 
-                    size="sm" 
-                    className="h-8 px-4 bg-[#0B1F3B] hover:bg-[#12345A] text-white text-xs"
+              <div className="flex items-center gap-2">
+                {isHardModeUnlocked && (
+                  <Button
+                    size="sm"
+                    variant={showHardOnly ? "default" : "outline"}
+                    className={`h-8 px-3 text-xs ${
+                      showHardOnly
+                        ? "bg-red-600 hover:bg-red-700"
+                        : "border-red-200 text-red-600 hover:bg-red-50"
+                    }`}
+                    onClick={() => setShowHardOnly(!showHardOnly)}
                   >
-                    Next Mission →
+                    {showHardOnly ? "All" : "Hard Only"}
                   </Button>
-                </Link>
-              )}
+                )}
+                {nextScenario && (
+                  <Link href={`/psv-quest/${nextScenario.id}`}>
+                    <Button
+                      size="sm"
+                      className="h-8 px-4 bg-[#0B1F3B] hover:bg-[#12345A] text-white text-xs"
+                    >
+                      Next Mission →
+                    </Button>
+                  </Link>
+                )}
+              </div>
             </div>
 
             {/* Scenario Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-              {scenarios.map((scenario, index) => {
-                // First scenario always unlocked, others unlock after completing previous
-                const isLocked =
-                  index > 0 &&
-                  !profile.completedScenarios.includes(scenarios[index - 1].id);
+              {displayedScenarios.map((scenario, index) => {
+                // For hard-only view, all are unlocked if hard mode is unlocked
+                // For regular view, first scenario always unlocked, others unlock after completing previous
+                const isLocked = showHardOnly
+                  ? false
+                  : index > 0 &&
+                    !profile.completedScenarios.includes(
+                      scenarios[index - 1].id
+                    );
 
-                const unlockReq = index === 0 
-                  ? ""
-                  : `Complete "${scenarios[index - 1].title}" first`;
+                const unlockReq =
+                  index === 0
+                    ? ""
+                    : `Complete "${scenarios[index - 1].title}" first`;
 
                 return (
                   <LevelCard
@@ -288,6 +397,8 @@ export default function PSVQuestLobby() {
                     attemptCount={profile.scenarioAttempts[scenario.id] || 0}
                     currentXP={profile.xp}
                     unlockRequirement={unlockReq}
+                    isHardModeUnlocked={isHardModeUnlocked}
+                    showHardBadge={showHardOnly || scenario.isHardEligible}
                   />
                 );
               })}
@@ -297,7 +408,14 @@ export default function PSVQuestLobby() {
             <div className="p-4 bg-white border border-slate-200 rounded-lg">
               <div className="flex items-start gap-3">
                 <div className="p-1.5 bg-slate-100 rounded-lg">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth="2">
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#64748B"
+                    strokeWidth="2"
+                  >
                     <circle cx="12" cy="12" r="10" />
                     <line x1="12" y1="16" x2="12" y2="12" />
                     <line x1="12" y1="8" x2="12.01" y2="8" />
@@ -308,9 +426,10 @@ export default function PSVQuestLobby() {
                     Training Mode
                   </h4>
                   <p className="text-xs text-slate-500 leading-relaxed">
-                    These scenarios are for training purposes only. Grades are based on answer keys – 
-                    no actual sizing calculations are performed. Always consult engineering standards 
-                    for real-world applications.
+                    These scenarios are for training purposes only. Grades are
+                    based on answer keys – no actual sizing calculations are
+                    performed. Always consult engineering standards for
+                    real-world applications.
                   </p>
                 </div>
               </div>
@@ -325,7 +444,7 @@ export default function PSVQuestLobby() {
           <div className="flex items-center justify-between text-xs text-slate-500">
             <div>PSV Sizing Quest – Puffer Training Platform</div>
             <div className="flex items-center gap-3">
-              <span>v1.0</span>
+              <span>v2.0</span>
               <span className="text-slate-300">•</span>
               <span>For training only</span>
             </div>

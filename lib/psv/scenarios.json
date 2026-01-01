@@ -5,6 +5,8 @@
     "description": "A high-pressure steam header feeds multiple process units. A downstream isolation valve may be inadvertently closed, creating a blocked outlet scenario. The PSV must protect the header from overpressure. Discharge is to atmosphere via a silencer.",
     "serviceType": "steam",
     "difficulty": 2,
+    "basePoints": 100,
+    "isHardEligible": false,
     "constraints": [
       "Discharge to atmosphere (no backpressure concerns)",
       "Set pressure at MAWP of 150 psig",
@@ -47,6 +49,8 @@
     "description": "A process gas compressor discharge vessel requires overpressure protection. The PSV discharges to a common flare header shared with multiple units. During upset conditions, flare header pressure can fluctuate significantly, creating variable backpressure concerns.",
     "serviceType": "gas",
     "difficulty": 3,
+    "basePoints": 120,
+    "isHardEligible": false,
     "constraints": [
       "Discharge to flare header (variable backpressure)",
       "Superimposed backpressure: 15-45 psig (variable)",
@@ -92,6 +96,8 @@
     "description": "A heat exchanger shell containing a liquid hydrocarbon can be blocked in during maintenance or turnaround. Solar radiation or residual heat can cause thermal expansion of the trapped liquid. A thermal relief valve is required to prevent hydraulic overpressure.",
     "serviceType": "liquid",
     "difficulty": 2,
+    "basePoints": 100,
+    "isHardEligible": false,
     "constraints": [
       "Thermal expansion case – small flow, critical selection",
       "Liquid service – volumetric flow basis",
@@ -125,6 +131,165 @@
         "title": "Process Note",
         "type": "markdown",
         "contentRef": "Thermal expansion relief: Expected flow ~3 GPM based on heat input calculation. Fluid: Light naphtha, SG=0.68, viscosity ~0.5 cP. Relieving temp assumed 150°F. Closed drain header pressure negligible (<5 psig)."
+      }
+    ]
+  },
+  {
+    "id": "hard-psv-high-backpressure",
+    "title": "[HARD] High Backpressure PSV – Critical Flare Scenario",
+    "description": "A high-pressure separator requires overpressure protection during a fire case scenario. The PSV discharges to an overloaded flare system with extremely variable backpressure. This challenging scenario requires careful backpressure analysis and valve selection to avoid catastrophic failure.",
+    "serviceType": "gas",
+    "difficulty": 4,
+    "basePoints": 250,
+    "isHardEligible": true,
+    "constraints": [
+      "Fire case relieving scenario – external fire on vessel",
+      "Superimposed backpressure: 30-75 psig (highly variable)",
+      "Total backpressure may exceed 50% of set pressure during peak events",
+      "Set pressure at 285 psig (vessel MAWP)",
+      "Pilot valve may be required for this high backpressure range",
+      "Backpressure correction factor critical for sizing"
+    ],
+    "datasheetRequirements": [
+      "relievingCase",
+      "dischargeTo",
+      "setPressurePsig",
+      "relievingTempF",
+      "serviceType",
+      "requiredMassFlowLbHr",
+      "mw",
+      "k",
+      "z",
+      "superimposedBackpressurePsig",
+      "builtUpBackpressurePsig"
+    ],
+    "visuals": {
+      "thumbnail": "flare_line_thumbnail",
+      "widgets": ["ReliefPathDiagram", "BackpressureGauge", "ValveCutaway", "OrificeWheel"]
+    },
+    "attachments": [
+      {
+        "id": "pid-hard-psv",
+        "title": "P&ID Snippet – HP Separator V-201",
+        "type": "markdown",
+        "contentRef": "High Pressure Separator V-201. MAWP 285 psig. Vessel in fire zone per API 2000 analysis. PSV-401 on vapor space. Discharge to 12\" flare header. Header serves multiple units and is frequently overloaded. WARNING: Flare header backpressure has reached 75 psig during simultaneous relief events."
+      },
+      {
+        "id": "process-note-hard-psv",
+        "title": "Process Note",
+        "type": "markdown",
+        "contentRef": "Fire case per API 521: Wetted area 850 sq ft. Relief load: 85,000 lb/hr. Gas: Light hydrocarbon vapor, MW=44, k=1.15, Z=0.88. Relieving temp: 400°F. Built-up BP from discharge piping: ~35 psig. CRITICAL: Conventional valves have failed in this service due to backpressure-induced set point shift."
+      },
+      {
+        "id": "historical-incident",
+        "title": "Historical Incident Note",
+        "type": "markdown",
+        "contentRef": "LESSON LEARNED: A previous installation used a bellows valve that experienced bellows failure due to overpressure. Root cause: Total backpressure exceeded bellows rating during simultaneous relief. Consider pilot-operated valve for this high backpressure application."
+      }
+    ]
+  },
+  {
+    "id": "hard-tank-fire-vru",
+    "title": "[HARD] Tank Fire Case with VRU Integration",
+    "description": "An atmospheric storage tank requires emergency venting protection for fire case. The tank has both a normal vent (to VRU) and emergency vent (to atmosphere). The scenario involves complex vapor recovery unit (VRU) integration and requires understanding of tank breathing, fire relief, and arrester placement.",
+    "serviceType": "gas",
+    "difficulty": 5,
+    "basePoints": 300,
+    "isHardEligible": true,
+    "constraints": [
+      "Atmospheric tank fire case – API 2000 emergency venting",
+      "Normal operation vents to Vapor Recovery Unit (VRU)",
+      "Emergency vent must bypass VRU and vent to atmosphere",
+      "Flame arrester required on atmospheric discharge",
+      "Conservation vent + emergency vent combination",
+      "Set pressure: 0.5 psig (very low pressure tank)",
+      "Arrester pressure drop must be included in sizing"
+    ],
+    "datasheetRequirements": [
+      "relievingCase",
+      "dischargeTo",
+      "setPressurePsig",
+      "relievingTempF",
+      "serviceType",
+      "requiredMassFlowLbHr",
+      "mw",
+      "k"
+    ],
+    "visuals": {
+      "thumbnail": "flare_line_thumbnail",
+      "widgets": ["ReliefPathDiagram", "ValveCutaway", "OrificeWheel"]
+    },
+    "attachments": [
+      {
+        "id": "pid-tank-fire",
+        "title": "P&ID Snippet – Tank T-301",
+        "type": "markdown",
+        "contentRef": "Atmospheric Storage Tank T-301. Design pressure: 1.0 psig / -0.5 psig. Stores crude oil. Normal vent line to VRU header. Emergency vent VV-301 direct to atmosphere. Flame arrester FA-301 on emergency vent outlet. HH level alarm at 95%. Shutdown on HHH at 98%."
+      },
+      {
+        "id": "process-note-tank",
+        "title": "Process Note",
+        "type": "markdown",
+        "contentRef": "Fire case per API 2000 Table 4: Tank diameter 50 ft, height 40 ft. Wetted area: 6,283 sq ft. Emergency vent requirement: 750,000 SCFH. Normal breathing handled by conservation vent. Gas properties: MW=65 (heavy ends), k=1.08. Flame arrester dP: 2 inwc at rated flow."
+      },
+      {
+        "id": "vru-note",
+        "title": "VRU Integration Note",
+        "type": "markdown",
+        "contentRef": "VRU capacity: 500 SCFM at 0.25 psig suction. VRU cannot handle fire case flows. Emergency vent must lift before tank approaches MAWP. Conservation vent setting: +0.5/-0.25 psig. Emergency vent setting: +0.75 psig. RISK: Arrester plugging from product carryover – inspect monthly."
+      }
+    ]
+  },
+  {
+    "id": "hard-overfill-protection",
+    "title": "[HARD] Overfill Protection System Design",
+    "description": "A critical loading rack requires overfill protection per API 2350. The scenario involves high-level shutdown integration, independent high-high level alarm, and emergency vent sizing for maximum pumping rate. This tests understanding of overfill prevention layers and relief device coordination.",
+    "serviceType": "liquid",
+    "difficulty": 4,
+    "basePoints": 280,
+    "isHardEligible": true,
+    "constraints": [
+      "Overfill protection case – maximum transfer rate",
+      "API 2350 Category 3 system required",
+      "Independent HH alarm and HHH shutdown",
+      "Relief valve sized for pump dead-head + thermal effects",
+      "Liquid service with potential two-phase flash",
+      "Discharge to containment sump",
+      "Set pressure at 15 psig (tank truck MAWP)"
+    ],
+    "datasheetRequirements": [
+      "relievingCase",
+      "dischargeTo",
+      "setPressurePsig",
+      "relievingTempF",
+      "serviceType",
+      "requiredVolFlowGpm",
+      "densitySg",
+      "viscosityCp",
+      "vaporPressurePsia"
+    ],
+    "visuals": {
+      "thumbnail": "pump_thermal_thumbnail",
+      "widgets": ["ReliefPathDiagram", "ValveCutaway", "OrificeWheel"]
+    },
+    "attachments": [
+      {
+        "id": "pid-overfill",
+        "title": "P&ID Snippet – Loading Rack LR-101",
+        "type": "markdown",
+        "contentRef": "Tank Truck Loading Rack LR-101. Transfer pump P-101 rated 500 GPM at 50 psig. Independent level instruments: LI-101 (normal), LAH-101 (high alarm), LAHH-101 (high-high shutdown). PSV-501 on loading header downstream of pump. Discharge to containment sump. Truck MAWP: 15 psig."
+      },
+      {
+        "id": "process-note-overfill",
+        "title": "Process Note",
+        "type": "markdown",
+        "contentRef": "Product: Gasoline, SG=0.73, viscosity 0.5 cP, RVP 9 psia. Max transfer rate: 500 GPM. Dead-head pressure: 85 psig. Thermal relief consideration: Blocked-in volume may expand 0.5% from solar heating. PSV must handle pump runout (550 GPM) plus thermal contribution."
+      },
+      {
+        "id": "api2350-note",
+        "title": "API 2350 Requirements",
+        "type": "markdown",
+        "contentRef": "API 2350 Category 3 requires: (1) Automatic tank gauging, (2) Independent high level alarm, (3) Independent high-high shutdown, (4) Overfill prevention system test annually. CRITICAL: Level instruments must be independent – no common sensing element. PSV is last line of defense, not primary protection."
       }
     ]
   }

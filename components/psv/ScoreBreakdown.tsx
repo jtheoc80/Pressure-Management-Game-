@@ -11,12 +11,19 @@ interface ScoreBreakdownProps {
 }
 
 export function ScoreBreakdown({ result }: ScoreBreakdownProps) {
-  const { breakdown, mistakes, missingFields, remediationSteps, correctAnswers } = result;
+  const { breakdown, mistakes, missingFields, remediationSteps, correctAnswers } =
+    result;
 
   const getScoreColor = (score: number) => {
     if (score >= 80) return "text-green-600";
     if (score >= 60) return "text-yellow-600";
     return "text-red-600";
+  };
+
+  const getProgressColor = (score: number) => {
+    if (score >= 80) return "bg-green-500";
+    if (score >= 60) return "bg-yellow-500";
+    return "bg-red-500";
   };
 
   const getGrade = (score: number) => {
@@ -37,11 +44,34 @@ export function ScoreBreakdown({ result }: ScoreBreakdownProps) {
     return value.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
   };
 
+  // Check if we have the new breakdown format
+  const hasNewBreakdown =
+    breakdown.datasheetQuality !== undefined ||
+    breakdown.explanation !== undefined;
+
+  // Calculate percentages for new breakdown
+  const datasheetQualityPct = hasNewBreakdown
+    ? (breakdown.datasheetQuality / 30) * 100
+    : (breakdown.datasheetScore / breakdown.datasheetMax) * 100;
+  const decisionAccuracyPct = hasNewBreakdown
+    ? (breakdown.decisionAccuracy / 45) * 100
+    : (breakdown.decisionScore / breakdown.decisionMax) * 100;
+  const disciplinePct = hasNewBreakdown
+    ? (breakdown.discipline / 15) * 100
+    : (breakdown.disciplineScore / breakdown.disciplineMax) * 100;
+  const explanationPct = hasNewBreakdown ? (breakdown.explanation / 10) * 100 : 0;
+
   return (
     <div className="space-y-4">
       {/* Overall Score Card */}
       <Card className="border-[var(--puffer-border)] overflow-hidden">
-        <div className="bg-gradient-to-r from-[var(--puffer-navy)] to-[var(--puffer-navy-2)] p-6 text-white">
+        <div
+          className={`p-6 text-white ${
+            result.mode === "hard"
+              ? "bg-gradient-to-r from-red-600 to-red-800"
+              : "bg-gradient-to-r from-[var(--puffer-navy)] to-[var(--puffer-navy-2)]"
+          }`}
+        >
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-bold">Your Score</h2>
@@ -53,18 +83,38 @@ export function ScoreBreakdown({ result }: ScoreBreakdownProps) {
             </div>
           </div>
           <div className="mt-4">
-            <Progress
-              value={result.score}
-              className="h-3 bg-white/20"
-            />
+            <Progress value={result.score} className="h-3 bg-white/20" />
           </div>
-          <div className="mt-4 flex items-center gap-4">
+          <div className="mt-4 flex items-center gap-4 flex-wrap">
             <Badge className="bg-white/20 text-white hover:bg-white/30">
               Grade: {grade.grade}
             </Badge>
-            <Badge className="bg-white/20 text-white hover:bg-white/30">
-              +{result.xpAwarded} XP
+            <Badge
+              className={`${
+                result.mode === "hard"
+                  ? "bg-red-900/50 text-white hover:bg-red-900/70"
+                  : "bg-white/20 text-white hover:bg-white/30"
+              }`}
+            >
+              +{result.pointsEarned ?? result.xpAwarded} pts
             </Badge>
+            {result.mode && (
+              <Badge
+                className={`${
+                  result.mode === "hard"
+                    ? "bg-red-900/50 text-white"
+                    : result.mode === "practice"
+                    ? "bg-slate-600/50 text-white"
+                    : "bg-white/20 text-white"
+                }`}
+              >
+                {result.mode === "hard"
+                  ? "2× Hard Mode"
+                  : result.mode === "practice"
+                  ? "Practice"
+                  : "Standard"}
+              </Badge>
+            )}
           </div>
         </div>
       </Card>
@@ -77,59 +127,107 @@ export function ScoreBreakdown({ result }: ScoreBreakdownProps) {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Datasheet Score */}
+          {/* Datasheet Quality */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium text-[var(--puffer-gray)]">
-                Datasheet Completeness
+                Datasheet Quality
               </span>
-              <span className={`text-sm font-semibold ${getScoreColor(
-                (breakdown.datasheetScore / breakdown.datasheetMax) * 100
-              )}`}>
-                {breakdown.datasheetScore}/{breakdown.datasheetMax}
+              <span
+                className={`text-sm font-semibold ${getScoreColor(
+                  datasheetQualityPct
+                )}`}
+              >
+                {hasNewBreakdown
+                  ? `${breakdown.datasheetQuality}/30`
+                  : `${breakdown.datasheetScore}/${breakdown.datasheetMax}`}
               </span>
             </div>
-            <Progress
-              value={(breakdown.datasheetScore / breakdown.datasheetMax) * 100}
-              className="h-2"
-            />
+            <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all ${getProgressColor(
+                  datasheetQualityPct
+                )}`}
+                style={{ width: `${datasheetQualityPct}%` }}
+              />
+            </div>
           </div>
 
-          {/* Decision Score */}
+          {/* Decision Accuracy */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium text-[var(--puffer-gray)]">
-                Decision Correctness
+                Decision Accuracy
               </span>
-              <span className={`text-sm font-semibold ${getScoreColor(
-                (breakdown.decisionScore / breakdown.decisionMax) * 100
-              )}`}>
-                {breakdown.decisionScore}/{breakdown.decisionMax}
+              <span
+                className={`text-sm font-semibold ${getScoreColor(
+                  decisionAccuracyPct
+                )}`}
+              >
+                {hasNewBreakdown
+                  ? `${breakdown.decisionAccuracy}/45`
+                  : `${breakdown.decisionScore}/${breakdown.decisionMax}`}
               </span>
             </div>
-            <Progress
-              value={(breakdown.decisionScore / breakdown.decisionMax) * 100}
-              className="h-2"
-            />
+            <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all ${getProgressColor(
+                  decisionAccuracyPct
+                )}`}
+                style={{ width: `${decisionAccuracyPct}%` }}
+              />
+            </div>
           </div>
 
-          {/* Discipline Score */}
+          {/* Process Discipline */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium text-[var(--puffer-gray)]">
                 Process Discipline
               </span>
-              <span className={`text-sm font-semibold ${getScoreColor(
-                (breakdown.disciplineScore / breakdown.disciplineMax) * 100
-              )}`}>
-                {breakdown.disciplineScore}/{breakdown.disciplineMax}
+              <span
+                className={`text-sm font-semibold ${getScoreColor(disciplinePct)}`}
+              >
+                {hasNewBreakdown
+                  ? `${breakdown.discipline}/15`
+                  : `${breakdown.disciplineScore}/${breakdown.disciplineMax}`}
               </span>
             </div>
-            <Progress
-              value={(breakdown.disciplineScore / breakdown.disciplineMax) * 100}
-              className="h-2"
-            />
+            <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all ${getProgressColor(
+                  disciplinePct
+                )}`}
+                style={{ width: `${disciplinePct}%` }}
+              />
+            </div>
           </div>
+
+          {/* Explanation (new) */}
+          {hasNewBreakdown && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-[var(--puffer-gray)]">
+                  Explanation Quality
+                </span>
+                <span
+                  className={`text-sm font-semibold ${getScoreColor(
+                    explanationPct
+                  )}`}
+                >
+                  {breakdown.explanation}/10
+                </span>
+              </div>
+              <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all ${getProgressColor(
+                    explanationPct
+                  )}`}
+                  style={{ width: `${explanationPct}%` }}
+                />
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -175,7 +273,14 @@ export function ScoreBreakdown({ result }: ScoreBreakdownProps) {
         <Card className="border-red-200 bg-red-50">
           <CardHeader>
             <CardTitle className="text-base text-red-800 flex items-center gap-2">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
                 <circle cx="12" cy="12" r="10" />
                 <line x1="12" y1="8" x2="12" y2="12" />
                 <line x1="12" y1="16" x2="12.01" y2="16" />
@@ -204,7 +309,14 @@ export function ScoreBreakdown({ result }: ScoreBreakdownProps) {
         <Card className="border-yellow-200 bg-yellow-50">
           <CardHeader>
             <CardTitle className="text-base text-yellow-800 flex items-center gap-2">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
                 <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
                 <line x1="12" y1="9" x2="12" y2="13" />
                 <line x1="12" y1="17" x2="12.01" y2="17" />
@@ -232,7 +344,14 @@ export function ScoreBreakdown({ result }: ScoreBreakdownProps) {
       <Card className="border-[var(--puffer-border)]">
         <CardHeader>
           <CardTitle className="text-base text-[var(--puffer-navy)] flex items-center gap-2">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
               <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
               <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
             </svg>

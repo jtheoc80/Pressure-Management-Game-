@@ -9,6 +9,8 @@ export type ValveStyle = "conventional" | "bellows" | "pilot";
 
 export type Difficulty = 1 | 2 | 3 | 4 | 5;
 
+export type PlayMode = "practice" | "standard" | "hard";
+
 export type OrificeLetter =
   | "D"
   | "E"
@@ -114,10 +116,22 @@ export interface Scenario {
   };
 
   attachments?: ScenarioAttachment[];
+
+  // Scoring configuration
+  basePoints: number;
+  isHardEligible: boolean;
 }
 
 export interface CommonMistake {
   key: string;
+  message: string;
+}
+
+export interface CriticalRule {
+  key: string;
+  when: string; // condition key for code evaluation
+  capScoreAt: number;
+  penaltyPoints: number;
   message: string;
 }
 
@@ -129,6 +143,9 @@ export interface Outcome {
   rationaleBullets: string[];
   commonMistakes: CommonMistake[];
   requiredFieldsForFullCredit: DatasheetField[];
+  // New fields for enhanced scoring
+  criticalRules?: CriticalRule[];
+  explanationKeywords?: string[];
 }
 
 export interface PlayerAnswers {
@@ -137,13 +154,39 @@ export interface PlayerAnswers {
   orificeLetter: OrificeLetter;
 }
 
-export interface GradeRequest {
-  scenarioId: string;
-  datasheet: Datasheet;
-  answers: PlayerAnswers;
+export interface GradeTelemetry {
+  hintsUsed: number;
+  attachmentsOpened: boolean;
+  attemptNumber: number;
 }
 
+export interface GradeRequest {
+  scenarioId: string;
+  mode: PlayMode;
+  datasheet: Datasheet;
+  answers: PlayerAnswers;
+  explanationText?: string;
+  telemetry: GradeTelemetry;
+}
+
+// Legacy score breakdown for backward compatibility
+export interface ScoreBreakdownLegacy {
+  datasheetScore: number;
+  datasheetMax: number;
+  decisionScore: number;
+  decisionMax: number;
+  disciplineScore: number;
+  disciplineMax: number;
+  total: number;
+}
+
+// New detailed score breakdown
 export interface ScoreBreakdown {
+  datasheetQuality: number; // 0-30
+  decisionAccuracy: number; // 0-45
+  discipline: number; // 0-15
+  explanation: number; // 0-10
+  // Legacy fields for backward compatibility with UI
   datasheetScore: number;
   datasheetMax: number;
   decisionScore: number;
@@ -155,13 +198,17 @@ export interface ScoreBreakdown {
 
 export interface GradeResult {
   scenarioId: string;
-  score: number;
+  score: number; // 0-100 competency score
+  pointsEarned: number; // variable XP/points
+  capsApplied: string[];
+  criticalMistakes: string[];
   breakdown: ScoreBreakdown;
   missingFields: DatasheetField[];
   mistakes: string[];
   remediationSteps: string[];
-  xpAwarded: number;
+  xpAwarded: number; // alias for pointsEarned for backward compatibility
   correctAnswers: PlayerAnswers;
+  mode: PlayMode;
 }
 
 export interface Badge {
@@ -174,6 +221,12 @@ export interface Badge {
 
 export type RankTitle = "Apprentice" | "Technician" | "Specialist" | "Lead";
 
+export interface HardModeProgress {
+  isUnlocked: boolean;
+  qualifyingAttempts: number; // attempts with score >= 85 in standard mode
+  unlockedAt?: string;
+}
+
 export interface PlayerProfile {
   xp: number;
   rank: RankTitle;
@@ -182,13 +235,17 @@ export interface PlayerProfile {
   completedScenarios: string[];
   scenarioAttempts: Record<string, number>;
   scenarioBestScores: Record<string, number>;
+  hardModeProgress: HardModeProgress;
 }
 
 export interface AttemptRecord {
   attemptId: string;
   timestamp: string;
   score: number;
+  pointsEarned: number;
   breakdown: ScoreBreakdown;
   answers: PlayerAnswers;
   datasheet: Datasheet;
+  mode: PlayMode;
+  explanationText?: string;
 }
