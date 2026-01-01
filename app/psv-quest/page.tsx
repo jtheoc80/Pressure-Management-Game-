@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { SignInButton } from "@clerk/nextjs";
 import { useSafeUser } from "@/lib/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -130,11 +129,11 @@ export default function PSVQuestLobby() {
                   </Link>
                 </div>
               ) : (
-                <SignInButton mode="modal">
-                  <Button variant="secondary" size="sm">
-                    Sign in to play
-                  </Button>
-                </SignInButton>
+              <Link href="/sign-in">
+                <Button variant="secondary" size="sm">
+                  Sign in to play
+                </Button>
+              </Link>
               )}
             </div>
           </div>
@@ -149,11 +148,11 @@ export default function PSVQuestLobby() {
               <span className="text-amber-800">
                 Sign in to track your progress and unlock scenarios by completing the Training Academy.
               </span>
-              <SignInButton mode="modal">
+              <Link href="/sign-in">
                 <Button size="sm" variant="outline" className="border-amber-300 text-amber-700 hover:bg-amber-100">
                   Sign In
                 </Button>
-              </SignInButton>
+              </Link>
             </AlertDescription>
           </Alert>
         )}

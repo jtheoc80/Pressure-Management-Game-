@@ -1,61 +1,38 @@
 "use client";
 
-import { useUser as useClerkUser, useAuth as useClerkAuth } from "@clerk/nextjs";
+// Clerk disabled for development - returns mock values
 
-// Check if Clerk is configured
-export const isClerkConfigured = () => {
-  if (typeof window === "undefined") return false;
-  const key = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
-  return key && key.startsWith("pk_") && key.length > 20;
-};
-
-// Safe wrapper for useUser that returns defaults when Clerk isn't configured
-export function useSafeUser() {
-  // If Clerk isn't configured, return default values
-  if (!isClerkConfigured()) {
-    return {
-      isSignedIn: false,
-      isLoaded: true,
-      user: null,
-    };
-  }
-
-  try {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const { isSignedIn, isLoaded, user } = useClerkUser();
-    return { isSignedIn, isLoaded, user };
-  } catch {
-    // Fallback if hook fails
-    return {
-      isSignedIn: false,
-      isLoaded: true,
-      user: null,
-    };
-  }
+// Mock user type to match Clerk's user object
+interface MockUser {
+  firstName: string | null;
+  lastName: string | null;
+  emailAddresses: { emailAddress: string }[];
+  id: string;
 }
 
-// Safe wrapper for useAuth
-export function useSafeAuth() {
-  if (!isClerkConfigured()) {
-    return {
-      isSignedIn: false,
-      isLoaded: true,
-      userId: null,
-      sessionId: null,
-      getToken: async () => null,
-    };
-  }
+// Check if Clerk is configured (always false for now)
+export const isClerkConfigured = () => false;
 
-  try {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    return useClerkAuth();
-  } catch {
-    return {
-      isSignedIn: false,
-      isLoaded: true,
-      userId: null,
-      sessionId: null,
-      getToken: async () => null,
-    };
-  }
+// Mock user hook - always returns not signed in
+export function useSafeUser(): {
+  isSignedIn: boolean;
+  isLoaded: boolean;
+  user: MockUser | null;
+} {
+  return {
+    isSignedIn: false,
+    isLoaded: true,
+    user: null,
+  };
+}
+
+// Mock auth hook
+export function useSafeAuth() {
+  return {
+    isSignedIn: false,
+    isLoaded: true,
+    userId: null,
+    sessionId: null,
+    getToken: async () => null,
+  };
 }
