@@ -511,7 +511,7 @@ export const lessons: Lesson[] = [
     drillRequired: true,
   },
   {
-    id: "psv-gas-service",
+    id: "psv-107",
     track: "psv",
     title: "Gas Service PSV Applications",
     estMinutes: 12,
@@ -561,7 +561,7 @@ export const lessons: Lesson[] = [
     prerequisiteIds: ["psv-106"],
   },
   {
-    id: "psv-steam-service",
+    id: "psv-108",
     track: "psv",
     title: "Steam Service PSV Applications",
     estMinutes: 10,
@@ -608,10 +608,10 @@ export const lessons: Lesson[] = [
     requiredToUnlock: false,
     unlocks: [],
     order: 8,
-    prerequisiteIds: ["psv-gas-service"],
+    prerequisiteIds: ["psv-107"],
   },
   {
-    id: "psv-liquid-service",
+    id: "psv-109",
     track: "psv",
     title: "Liquid Service PSV Applications",
     estMinutes: 12,
@@ -658,10 +658,10 @@ export const lessons: Lesson[] = [
     requiredToUnlock: false,
     unlocks: [],
     order: 9,
-    prerequisiteIds: ["psv-steam-service"],
+    prerequisiteIds: ["psv-108"],
   },
   {
-    id: "psv-discharge-systems",
+    id: "psv-110",
     track: "psv",
     title: "Discharge Systems: ATM vs Flare vs Closed",
     estMinutes: 10,
@@ -708,10 +708,10 @@ export const lessons: Lesson[] = [
     requiredToUnlock: false,
     unlocks: [],
     order: 10,
-    prerequisiteIds: ["psv-liquid-service"],
+    prerequisiteIds: ["psv-109"],
   },
   {
-    id: "psv-datasheet-workflow",
+    id: "psv-111",
     track: "psv",
     title: "The PSV Datasheet Workflow",
     estMinutes: 12,
@@ -758,10 +758,10 @@ export const lessons: Lesson[] = [
     requiredToUnlock: false,
     unlocks: [],
     order: 11,
-    prerequisiteIds: ["psv-discharge-systems"],
+    prerequisiteIds: ["psv-110"],
   },
   {
-    id: "psv-common-mistakes",
+    id: "psv-112",
     track: "psv",
     title: "Common Mistakes & Best Practices",
     estMinutes: 8,
@@ -813,7 +813,7 @@ export const lessons: Lesson[] = [
     requiredToUnlock: false,
     unlocks: ["coach_mode_off"],
     order: 12,
-    prerequisiteIds: ["psv-datasheet-workflow"],
+    prerequisiteIds: ["psv-111"],
   },
 
   // ============================================================================

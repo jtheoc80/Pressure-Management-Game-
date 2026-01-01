@@ -11,7 +11,7 @@ export const quizzes: Quiz[] = [
   // ============================================================================
   {
     id: "psv-intro-quiz",
-    lessonId: "psv-intro",
+    lessonId: "psv-101",
     title: "Introduction to Pressure Relief Quiz",
     passingScore: 80,
     questions: [
@@ -84,7 +84,7 @@ export const quizzes: Quiz[] = [
   },
   {
     id: "psv-terminology-quiz",
-    lessonId: "psv-terminology",
+    lessonId: "psv-102",
     title: "PSV Terminology Quiz",
     passingScore: 80,
     questions: [
@@ -155,7 +155,7 @@ export const quizzes: Quiz[] = [
   },
   {
     id: "psv-relieving-cases-quiz",
-    lessonId: "psv-relieving-cases",
+    lessonId: "psv-103",
     title: "Common Relieving Cases Quiz",
     passingScore: 80,
     questions: [
@@ -228,7 +228,7 @@ export const quizzes: Quiz[] = [
   },
   {
     id: "psv-backpressure-quiz",
-    lessonId: "psv-backpressure",
+    lessonId: "psv-104",
     title: "Backpressure Quiz",
     passingScore: 80,
     questions: [
@@ -301,7 +301,7 @@ export const quizzes: Quiz[] = [
   },
   {
     id: "psv-valve-types-quiz",
-    lessonId: "psv-valve-types",
+    lessonId: "psv-105",
     title: "PSV Types Quiz",
     passingScore: 80,
     questions: [
@@ -374,7 +374,7 @@ export const quizzes: Quiz[] = [
   },
   {
     id: "psv-orifice-sizing-quiz",
-    lessonId: "psv-orifice-sizing",
+    lessonId: "psv-106",
     title: "Orifice Sizing Quiz",
     passingScore: 80,
     questions: [
@@ -446,7 +446,7 @@ export const quizzes: Quiz[] = [
   },
   {
     id: "psv-gas-service-quiz",
-    lessonId: "psv-gas-service",
+    lessonId: "psv-107",
     title: "Gas Service Quiz",
     passingScore: 80,
     questions: [
@@ -518,7 +518,7 @@ export const quizzes: Quiz[] = [
   },
   {
     id: "psv-steam-service-quiz",
-    lessonId: "psv-steam-service",
+    lessonId: "psv-108",
     title: "Steam Service Quiz",
     passingScore: 80,
     questions: [
@@ -589,7 +589,7 @@ export const quizzes: Quiz[] = [
   },
   {
     id: "psv-liquid-service-quiz",
-    lessonId: "psv-liquid-service",
+    lessonId: "psv-109",
     title: "Liquid Service Quiz",
     passingScore: 80,
     questions: [
@@ -662,7 +662,7 @@ export const quizzes: Quiz[] = [
   },
   {
     id: "psv-discharge-systems-quiz",
-    lessonId: "psv-discharge-systems",
+    lessonId: "psv-110",
     title: "Discharge Systems Quiz",
     passingScore: 80,
     questions: [
@@ -735,7 +735,7 @@ export const quizzes: Quiz[] = [
   },
   {
     id: "psv-datasheet-workflow-quiz",
-    lessonId: "psv-datasheet-workflow",
+    lessonId: "psv-111",
     title: "Datasheet Workflow Quiz",
     passingScore: 80,
     questions: [
@@ -808,7 +808,7 @@ export const quizzes: Quiz[] = [
   },
   {
     id: "psv-common-mistakes-quiz",
-    lessonId: "psv-common-mistakes",
+    lessonId: "psv-112",
     title: "Common Mistakes Quiz",
     passingScore: 80,
     questions: [
@@ -885,7 +885,7 @@ export const quizzes: Quiz[] = [
   // ============================================================================
   {
     id: "tank-intro-quiz",
-    lessonId: "tank-intro",
+    lessonId: "tank-101",
     title: "Tank Protection Introduction Quiz",
     passingScore: 80,
     questions: [
@@ -958,7 +958,7 @@ export const quizzes: Quiz[] = [
   },
   {
     id: "tank-venting-requirements-quiz",
-    lessonId: "tank-venting-requirements",
+    lessonId: "tank-102",
     title: "Venting Requirements Quiz",
     passingScore: 80,
     questions: [
@@ -1031,7 +1031,7 @@ export const quizzes: Quiz[] = [
   },
   {
     id: "tank-pvrv-selection-quiz",
-    lessonId: "tank-pvrv-selection",
+    lessonId: "tank-103",
     title: "PVRV Selection Quiz",
     passingScore: 80,
     questions: [
@@ -1104,7 +1104,7 @@ export const quizzes: Quiz[] = [
   },
   {
     id: "tank-flame-arresters-quiz",
-    lessonId: "tank-flame-arresters",
+    lessonId: "tank-104",
     title: "Flame Arresters Quiz",
     passingScore: 80,
     questions: [
@@ -1177,7 +1177,7 @@ export const quizzes: Quiz[] = [
   },
   {
     id: "tank-vapor-control-quiz",
-    lessonId: "tank-vapor-control",
+    lessonId: "tank-105",
     title: "Vapor Control Systems Quiz",
     passingScore: 80,
     questions: [
@@ -1250,7 +1250,7 @@ export const quizzes: Quiz[] = [
   },
   {
     id: "tank-overfill-protection-quiz",
-    lessonId: "tank-overfill-protection",
+    lessonId: "tank-106",
     title: "Overfill Protection Quiz",
     passingScore: 80,
     questions: [
