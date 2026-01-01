@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { diagramRegistry, hasDiagram, getDiagramKeys } from "@/lib/academy/diagramRegistry";
 import { diagramComponents } from "./diagrams";
 import { useLessonProgressOptional } from "./LessonProgressProvider";
+import { CanvasFrameAuto } from "./CanvasFrame";
 
 interface DiagramRendererProps {
   diagramKey: string;
@@ -98,9 +99,11 @@ export function DiagramRenderer({
 
   return (
     <div ref={containerRef} className={`my-6 ${className}`}>
-      <div className="bg-white rounded-lg border border-gray-200 p-4 overflow-hidden min-h-[200px] flex items-center justify-center">
-        <DiagramComponent />
-      </div>
+      <CanvasFrameAuto minHeight={200} className="bg-white">
+        <div className="w-full [&_svg]:w-full [&_svg]:h-auto [&_svg]:block">
+          <DiagramComponent />
+        </div>
+      </CanvasFrameAuto>
       {caption && (
         <p className="text-sm text-gray-500 text-center mt-2 italic">
           {caption}
