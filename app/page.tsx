@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { SignInButton, UserButton } from "@clerk/nextjs";
+import dynamic from "next/dynamic";
 import { useSafeUser } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -10,6 +10,16 @@ import { HeroVisualCard, ProofBar, GuidedPath, Outcomes } from "@/components/lan
 import { getRequiredLessonsForUnlock } from "@/lib/academy/lessons";
 import { getProfile } from "@/lib/psv";
 import type { UserProgress } from "@/lib/academy/types";
+
+// Dynamically import Clerk components to avoid SSR issues during build
+const SignInButton = dynamic(
+  () => import("@clerk/nextjs").then((mod) => mod.SignInButton),
+  { ssr: false }
+);
+const UserButton = dynamic(
+  () => import("@clerk/nextjs").then((mod) => mod.UserButton),
+  { ssr: false }
+);
 
 export default function Home() {
   const { isSignedIn, isLoaded: clerkLoaded } = useSafeUser();
