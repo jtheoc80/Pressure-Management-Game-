@@ -47,17 +47,43 @@ export function ObjectivesRail({ objectives, onObjectiveClick }: ObjectivesRailP
 
   if (objectives.length === 0) return null;
 
+  const completedCount = objectives.filter(obj => getObjectiveStatus(obj) === "completed").length;
+  const inProgressCount = objectives.filter(obj => getObjectiveStatus(obj) === "in_progress").length;
+
   return (
-    <div className="w-full bg-slate-50 border border-slate-200 rounded-lg p-4 mb-6">
-      <div className="flex items-center gap-2 mb-3">
-        <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">
-          Learning Objectives
-        </span>
-        {progress && (
-          <span className="text-xs text-slate-400">
-            {progress.overallProgress}% complete
-          </span>
-        )}
+    <div className="w-full bg-gradient-to-r from-[#003366]/5 to-slate-50 border-2 border-[#003366]/20 rounded-xl p-5 mb-6 shadow-sm">
+      {/* Header Row */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-[#003366] rounded-lg flex items-center justify-center shadow-md">
+            <span className="text-white text-lg font-bold">{objectives.length}</span>
+          </div>
+          <div>
+            <h3 className="text-base font-bold text-[#003366]">
+              Learning Objectives
+            </h3>
+            <p className="text-xs text-slate-500">
+              Track your progress through this lesson
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          {completedCount > 0 && (
+            <span className="text-xs font-semibold text-teal-700 bg-teal-100 px-2 py-1 rounded-full">
+              {completedCount} done
+            </span>
+          )}
+          {inProgressCount > 0 && (
+            <span className="text-xs font-semibold text-[#003366] bg-[#003366]/10 px-2 py-1 rounded-full">
+              {inProgressCount} in progress
+            </span>
+          )}
+          {progress && (
+            <span className="text-sm font-bold text-slate-700 bg-white px-3 py-1.5 rounded-full border border-slate-200 shadow-sm">
+              {progress.overallProgress}%
+            </span>
+          )}
+        </div>
       </div>
       
       {/* Horizontal Rail */}
@@ -132,18 +158,23 @@ export function ObjectivesRail({ objectives, onObjectiveClick }: ObjectivesRailP
       </div>
       
       {/* Legend */}
-      <div className="flex items-center gap-4 mt-3 text-[10px] text-slate-400">
-        <span className="flex items-center gap-1">
-          <Circle className="w-3 h-3 text-slate-300" />
-          Not started
-        </span>
-        <span className="flex items-center gap-1">
-          <CircleDot className="w-3 h-3 text-[#003366]" />
-          In progress
-        </span>
-        <span className="flex items-center gap-1">
-          <CheckCircle2 className="w-3 h-3 text-teal-600" />
-          Complete
+      <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-200">
+        <div className="flex items-center gap-4 text-xs text-slate-500">
+          <span className="flex items-center gap-1">
+            <Circle className="w-3 h-3 text-slate-300" />
+            Not started
+          </span>
+          <span className="flex items-center gap-1">
+            <CircleDot className="w-3 h-3 text-[#003366]" />
+            In progress
+          </span>
+          <span className="flex items-center gap-1">
+            <CheckCircle2 className="w-3 h-3 text-teal-600" />
+            Complete
+          </span>
+        </div>
+        <span className="text-xs text-slate-400">
+          Click an objective to jump to content
         </span>
       </div>
     </div>
