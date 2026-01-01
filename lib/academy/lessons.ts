@@ -28,7 +28,7 @@ export const lessons: Lesson[] = [
       },
       {
         type: "image",
-        src: "/academy/photos/psv/conventional-valve-installed.jpg",
+        src: "/academy/photos/psv/training-photo.svg",
         alt: "Conventional PSV installed on a process vessel",
         caption: "A conventional PSV installed on a refinery vessel, protecting against overpressure",
         credit: "Training photo",
@@ -57,7 +57,7 @@ export const lessons: Lesson[] = [
       },
       {
         type: "hotspot",
-        imageSrc: "/academy/photos/psv/conventional-valve-installed.jpg",
+        imageSrc: "/academy/photos/psv/training-photo.svg",
         imageAlt: "PSV with labeled components",
         hotspots: [
           { xPct: 50, yPct: 15, label: "Cap/Bonnet", body: "Protects the spring and adjustment mechanism. Contains the set pressure adjustment." },
@@ -152,7 +152,7 @@ export const lessons: Lesson[] = [
       },
       {
         type: "image",
-        src: "/academy/photos/psv/bellows-valve-cutaway.jpg",
+        src: "/academy/photos/psv/training-photo.svg",
         alt: "Bellows PSV cutaway showing internal components",
         caption: "Cutaway of a balanced bellows PSV showing the bellows assembly",
         credit: "Training photo",
@@ -397,9 +397,9 @@ export const lessons: Lesson[] = [
       {
         type: "gallery",
         images: [
-          { src: "/academy/photos/psv/conventional-valve-installed.jpg", alt: "Conventional PSV", caption: "Conventional spring-loaded PSV" },
-          { src: "/academy/photos/psv/bellows-valve-cutaway.jpg", alt: "Bellows PSV cutaway", caption: "Balanced bellows valve showing bellows assembly" },
-          { src: "/academy/photos/psv/pilot-operated-valve.jpg", alt: "Pilot-operated PSV", caption: "Pilot-operated valve for high backpressure service" },
+          { src: "/academy/photos/psv/training-photo.svg", alt: "Conventional PSV", caption: "Conventional spring-loaded PSV (illustration)" },
+          { src: "/academy/photos/psv/training-photo.svg", alt: "Bellows PSV cutaway", caption: "Balanced bellows valve showing bellows assembly (illustration)" },
+          { src: "/academy/photos/psv/training-photo.svg", alt: "Pilot-operated PSV", caption: "Pilot-operated valve for high backpressure service (illustration)" },
         ],
       },
       {
@@ -913,7 +913,7 @@ export const lessons: Lesson[] = [
       },
       {
         type: "image",
-        src: "/academy/photos/tank/pvrv-on-tank.jpg",
+        src: "/academy/photos/tank/training-photo.svg",
         alt: "PVRV mounted on storage tank roof",
         caption: "A pressure/vacuum relief valve (PVRV) installed on a tank roof nozzle",
         credit: "Training photo",

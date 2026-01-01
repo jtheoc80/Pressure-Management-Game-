@@ -23,8 +23,8 @@ The PSV (PSV-101) on the flash drum opened at its set pressure of 150 psig and s
 Post-incident review confirmed the PSV was correctly sized for the blocked outlet case (maximum pump flow of 8,500 BPD). Had the PSV been sized only for fire case, it would have been undersized for this event.`,
     diagramKey: "ReliefPathDiagram",
     photos: [
-      { src: "/academy/photos/psv/conventional-valve-installed.jpg", alt: "Conventional PSV installed on vessel", caption: "PSV-101 installation on flash drum", credit: "Training photo" },
-      { src: "/academy/photos/field/control-valve-positioner.jpg", alt: "Control valve with positioner", caption: "FCV-101 positioner that failed", credit: "Training photo" },
+      { src: "/academy/photos/psv/training-photo.svg", alt: "Conventional PSV installed on vessel", caption: "PSV-101 installation on flash drum (illustration)", credit: "Training photo" },
+      { src: "/academy/photos/field/training-photo.svg", alt: "Control valve with positioner", caption: "FCV-101 positioner that failed (illustration)", credit: "Training photo" },
     ],
     requiredInputs: [
       "Set pressure (psig)",
@@ -62,8 +62,8 @@ PSV-301 on reactor R-101 was a conventional valve with a 100 psig set pressure. 
 Investigation revealed the valve should have been balanced bellows or pilot-operated. The replacement bellows valve maintains constant set pressure regardless of backpressure variations in the flare header.`,
     diagramKey: "BackpressureDiagram",
     photos: [
-      { src: "/academy/photos/psv/bellows-valve-cutaway.jpg", alt: "Bellows PSV cutaway", caption: "Balanced bellows valve construction", credit: "Training photo" },
-      { src: "/academy/photos/field/flare-header.jpg", alt: "Flare header piping", caption: "Shared flare header system", credit: "Training photo" },
+      { src: "/academy/photos/psv/training-photo.svg", alt: "Bellows PSV cutaway", caption: "Balanced bellows valve construction (illustration)", credit: "Training photo" },
+      { src: "/academy/photos/field/training-photo.svg", alt: "Flare header piping", caption: "Shared flare header system (illustration)", credit: "Training photo" },
     ],
     requiredInputs: [
       "Set pressure (psig)",
@@ -106,8 +106,8 @@ The following day, ambient temperature rose to 105°F, heating the trapped liqui
 Investigation found no thermal relief valve was installed. The original design assumed the exchanger would never be blocked in, but operating procedures had changed. A 3/4" thermal relief valve (TRV) was subsequently installed, set at 75 psig with discharge to closed drain.`,
     diagramKey: "ReliefPathDiagram",
     photos: [
-      { src: "/academy/photos/psv/thermal-relief-valve.jpg", alt: "Small thermal relief valve", caption: "Thermal relief valve (TRV) for blocked-in equipment", credit: "Training photo" },
-      { src: "/academy/photos/field/heat-exchanger.jpg", alt: "Shell and tube heat exchanger", caption: "Heat exchanger E-201 shell side", credit: "Training photo" },
+      { src: "/academy/photos/psv/training-photo.svg", alt: "Small thermal relief valve", caption: "Thermal relief valve (TRV) for blocked-in equipment (illustration)", credit: "Training photo" },
+      { src: "/academy/photos/field/training-photo.svg", alt: "Shell and tube heat exchanger", caption: "Heat exchanger E-201 shell side (illustration)", credit: "Training photo" },
     ],
     requiredInputs: [
       "Equipment MAWP (psig)",
@@ -144,8 +144,8 @@ Engineering analyzed multiple relieving scenarios. While blocked outlet required
 The design team initially sized for blocked outlet only. Design review caught the error, and the PSV was resized to handle fire case as the governing scenario. A J orifice (1.287 in²) was selected instead of the original F orifice (0.307 in²).`,
     diagramKey: "PSVStyleCutaways",
     photos: [
-      { src: "/academy/photos/field/offshore-separator.jpg", alt: "Horizontal separator on offshore platform", caption: "Three-phase separator V-100", credit: "Training photo" },
-      { src: "/academy/photos/psv/pilot-operated-valve.jpg", alt: "Pilot-operated PSV", caption: "Pilot-operated PSV for offshore service", credit: "Training photo" },
+      { src: "/academy/photos/field/training-photo.svg", alt: "Horizontal separator on offshore platform", caption: "Three-phase separator V-100 (illustration)", credit: "Training photo" },
+      { src: "/academy/photos/psv/training-photo.svg", alt: "Pilot-operated PSV", caption: "Pilot-operated PSV for offshore service (illustration)", credit: "Training photo" },
     ],
     requiredInputs: [
       "Vessel dimensions (diameter, length)",
@@ -187,8 +187,8 @@ The governing case is blocked outlet with full boiler output of 75,000 lb/hr sat
 The PSV discharges to atmosphere through a silencer stack. Since discharge is to atmosphere, a conventional valve is acceptable (no backpressure concerns). An L orifice (2.853 in²) was selected to handle the full boiler output.`,
     diagramKey: "DischargePathsDiagram",
     photos: [
-      { src: "/academy/photos/psv/steam-service-psv.jpg", alt: "Steam service PSV with silencer", caption: "PSV-501 with atmospheric discharge silencer", credit: "Training photo" },
-      { src: "/academy/photos/field/steam-header.jpg", alt: "High pressure steam header", caption: "150 psig steam distribution header", credit: "Training photo" },
+      { src: "/academy/photos/psv/training-photo.svg", alt: "Steam service PSV with silencer", caption: "PSV-501 with atmospheric discharge silencer (illustration)", credit: "Training photo" },
+      { src: "/academy/photos/field/training-photo.svg", alt: "High pressure steam header", caption: "150 psig steam distribution header (illustration)", credit: "Training photo" },
     ],
     requiredInputs: [
       "Set pressure (psig)",
@@ -227,8 +227,8 @@ During rapid filling, displaced vapors exceeded PVRV capacity. Tank internal pre
 Root cause: The PVRV was sized for thermal outbreathing only (~3,000 CFH) and did not account for liquid displacement during filling (~25,000 CFH). API 2000 requires sizing for BOTH thermal and liquid movement, taking the larger value.`,
     diagramKey: "TankBreathingDiagram",
     photos: [
-      { src: "/academy/photos/tank/pvrv-on-tank.jpg", alt: "PVRV mounted on tank roof", caption: "PVRV installation on tank roof nozzle", credit: "Training photo" },
-      { src: "/academy/photos/tank/floating-roof.jpg", alt: "Floating roof tank", caption: "Floating roof seal area", credit: "Training photo" },
+      { src: "/academy/photos/tank/training-photo.svg", alt: "PVRV mounted on tank roof", caption: "PVRV installation on tank roof nozzle (illustration)", credit: "Training photo" },
+      { src: "/academy/photos/tank/training-photo.svg", alt: "Floating roof tank", caption: "Floating roof seal area (illustration)", credit: "Training photo" },
     ],
     requiredInputs: [
       "Tank diameter and height",
@@ -270,8 +270,8 @@ Toluene has a Maximum Experimental Safe Gap (MESG) of 0.94 mm, placing it in Gro
 The facility replaced all arresters with IIA-rated units to provide appropriate safety margin. Additionally, the inspection program was updated to verify MESG compatibility for all new product storage.`,
     diagramKey: "FlameArresterDiagram",
     photos: [
-      { src: "/academy/photos/tank/flame-arrester.jpg", alt: "End-of-line flame arrester", caption: "Deflagration flame arrester on tank vent", credit: "Training photo" },
-      { src: "/academy/photos/tank/arrester-element.jpg", alt: "Flame arrester crimped ribbon element", caption: "Crimped ribbon element detail", credit: "Training photo" },
+      { src: "/academy/photos/tank/training-photo.svg", alt: "End-of-line flame arrester", caption: "Deflagration flame arrester on tank vent (illustration)", credit: "Training photo" },
+      { src: "/academy/photos/tank/training-photo.svg", alt: "Flame arrester crimped ribbon element", caption: "Crimped ribbon element detail (illustration)", credit: "Training photo" },
     ],
     requiredInputs: [
       "Product/vapor MESG (mm)",
@@ -312,8 +312,8 @@ Existing protection relied on a single level transmitter providing both high ala
 The upgrade installed an independent radar level switch for high-high shutdown, wired to a separate safety PLC. The existing level transmitter retained the high alarm function. Testing procedures were established to verify both systems quarterly.`,
     diagramKey: "OverfillLayersDiagram",
     photos: [
-      { src: "/academy/photos/tank/radar-level-switch.jpg", alt: "Radar level switch on tank", caption: "Independent HH level switch for overfill shutdown", credit: "Training photo" },
-      { src: "/academy/photos/tank/tank-farm-aerial.jpg", alt: "Tank farm aerial view", caption: "Refinery tank farm with containment", credit: "Training photo" },
+      { src: "/academy/photos/tank/training-photo.svg", alt: "Radar level switch on tank", caption: "Independent HH level switch for overfill shutdown (illustration)", credit: "Training photo" },
+      { src: "/academy/photos/tank/training-photo.svg", alt: "Tank farm aerial view", caption: "Refinery tank farm with containment (illustration)", credit: "Training photo" },
     ],
     requiredInputs: [
       "API 2350 category determination",
@@ -354,8 +354,8 @@ Fire case analysis per API 2000 environmental factor method required 180,000 SCF
 Total emergency capacity of 90,000 SCFH was less than half the requirement. The solution: install a dedicated emergency vent (lifting at 1.5 oz/sq in) sized for the balance of fire case requirement.`,
     diagramKey: "EmergencyVentDiagram",
     photos: [
-      { src: "/academy/photos/tank/emergency-vent.jpg", alt: "Emergency vent on tank roof", caption: "Emergency relief vent for fire case", credit: "Training photo" },
-      { src: "/academy/photos/tank/gauge-hatch.jpg", alt: "Tank gauge hatch", caption: "Gauge hatch that lifts during overpressure", credit: "Training photo" },
+      { src: "/academy/photos/tank/training-photo.svg", alt: "Emergency vent on tank roof", caption: "Emergency relief vent for fire case (illustration)", credit: "Training photo" },
+      { src: "/academy/photos/tank/training-photo.svg", alt: "Tank gauge hatch", caption: "Gauge hatch that lifts during overpressure (illustration)", credit: "Training photo" },
     ],
     requiredInputs: [
       "Tank wetted area (sq ft)",
@@ -391,8 +391,8 @@ Design review identified that if the VRU trips during loading, the full displace
 The final design included: (1) VRU sized for normal vapor displacement, (2) PVRVs upgraded to handle full loading displacement as backup, (3) High pressure permissive to stop loading if PVRVs lift.`,
     diagramKey: "VaporControlPathDiagram",
     photos: [
-      { src: "/academy/photos/tank/vapor-recovery-unit.jpg", alt: "Vapor recovery unit skid", caption: "VRU compressor and controls", credit: "Training photo" },
-      { src: "/academy/photos/field/marine-loading-arm.jpg", alt: "Marine loading arm", caption: "Ship loading with vapor return", credit: "Training photo" },
+      { src: "/academy/photos/tank/training-photo.svg", alt: "Vapor recovery unit skid", caption: "VRU compressor and controls (illustration)", credit: "Training photo" },
+      { src: "/academy/photos/field/training-photo.svg", alt: "Marine loading arm", caption: "Ship loading with vapor return (illustration)", credit: "Training photo" },
     ],
     requiredInputs: [
       "Normal vapor flow to VRU (SCFH)",

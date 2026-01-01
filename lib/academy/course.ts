@@ -444,13 +444,13 @@ const lesson2: Lesson = {
       title: "Pressure Gauges in the Field",
       images: [
         {
-          src: "/academy/photos/field/gauge-compound.jpg",
+          src: "/academy/photos/field/training-photo.svg",
           alt: "Compound pressure gauge showing both pressure and vacuum",
           caption: "Compound gauge: reads both positive pressure and vacuum",
           shotNote: "Close-up of a compound gauge dial showing the 0 psig reference point and vacuum scale"
         },
         {
-          src: "/academy/photos/psv/nameplate-set-pressure.jpg",
+          src: "/academy/photos/psv/training-photo.svg",
           alt: "PSV nameplate showing set pressure in psig",
           caption: "PSV nameplates always show set pressure in PSIG",
           shotNote: "Close-up of PSV nameplate with set pressure clearly visible (e.g., 'SET: 150 PSIG')"
@@ -1030,19 +1030,19 @@ const lesson5: Lesson = {
       title: "Valve Types in the Field",
       images: [
         {
-          src: "/academy/photos/psv/conventional-installed.jpg",
+          src: "/academy/photos/psv/training-photo.svg",
           alt: "Conventional PSV installed on a process vessel",
           caption: "Conventional PSV: Note the simple bonnet with test lever",
           shotNote: "Full shot of a conventional PSV mounted on a vessel nozzle, showing bonnet, test lever, and discharge elbow"
         },
         {
-          src: "/academy/photos/psv/bellows-cutaway.jpg",
+          src: "/academy/photos/psv/training-photo.svg",
           alt: "Bellows PSV cutaway showing bellows assembly",
           caption: "Bellows PSV: The bellows isolates the spring from backpressure",
           shotNote: "Cutaway or sectioned bellows valve showing the bellows element wrapped around the disc guide"
         },
         {
-          src: "/academy/photos/psv/pilot-operated.jpg",
+          src: "/academy/photos/psv/training-photo.svg",
           alt: "Pilot-operated PSV with pilot valve visible",
           caption: "Pilot-operated PSV: The small pilot controls the main valve",
           shotNote: "Full shot of pilot-operated valve showing the main body and the small pilot valve mounted on top"
@@ -1277,25 +1277,25 @@ const lesson6: Lesson = {
       title: "Tank Protection Equipment",
       images: [
         {
-          src: "/academy/photos/tank/pvrv-roof.jpg",
+          src: "/academy/photos/tank/training-photo.svg",
           alt: "PVRV mounted on tank roof nozzle",
           caption: "Pressure/Vacuum Relief Valve (PVRV) - protects against both overpressure and vacuum",
           shotNote: "Close-up of a PVRV installed on a tank roof, showing pressure and vacuum pallets"
         },
         {
-          src: "/academy/photos/tank/emergency-vent.jpg",
+          src: "/academy/photos/tank/training-photo.svg",
           alt: "Emergency vent on tank roof",
           caption: "Emergency vent - provides additional relief for fire case",
           shotNote: "Emergency vent device on tank roof, showing the larger opening compared to normal PVRV"
         },
         {
-          src: "/academy/photos/tank/flame-arrester.jpg",
+          src: "/academy/photos/tank/training-photo.svg",
           alt: "Flame arrester on tank vent",
           caption: "Flame arrester - prevents flame propagation into tank vapor space",
           shotNote: "Flame arrester installed between PVRV and tank nozzle, showing the element housing"
         },
         {
-          src: "/academy/photos/tank/radar-gauge.jpg",
+          src: "/academy/photos/tank/training-photo.svg",
           alt: "Radar level gauge on tank roof",
           caption: "Radar level gauge - primary level measurement for tank inventory",
           shotNote: "Radar gauge head mounted on tank roof with stilling well connection"
