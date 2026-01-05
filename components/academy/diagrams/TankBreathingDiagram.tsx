@@ -14,12 +14,11 @@ interface TankBreathingDiagramProps {
  */
 export function TankBreathingDiagram({ className = "" }: TankBreathingDiagramProps) {
   return (
-    <div className={`bg-white border border-slate-200 rounded-lg p-4 ${className}`}>
-      <svg
-        viewBox="0 0 800 420"
-        className="w-full h-auto"
-        style={{ maxHeight: "420px" }}
-      >
+    <svg
+      viewBox="0 0 800 420"
+      className={`w-full h-auto ${className}`}
+      preserveAspectRatio="xMidYMid meet"
+    >
         {/* Background */}
         <rect width="800" height="420" fill="#F8FAFC" />
 
@@ -153,6 +152,5 @@ export function TankBreathingDiagram({ className = "" }: TankBreathingDiagramPro
           </marker>
         </defs>
       </svg>
-    </div>
   );
 }

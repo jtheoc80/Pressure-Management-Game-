@@ -17,7 +17,8 @@ export { ObjectivesRail } from "./ObjectivesRail";
 export { DiagramRenderer, validateDiagramKeys, isDiagramAvailable } from "./DiagramRenderer";
 
 // New Lesson Player components
-export { CanvasFrame } from "./CanvasFrame";
+export { CanvasFrame, CanvasFrameAuto } from "./CanvasFrame";
+export { DiagramFrame } from "./DiagramFrame";
 export { StepRenderer } from "./StepRenderer";
 export { LessonPlayerLayout } from "./LessonPlayerLayout";
 

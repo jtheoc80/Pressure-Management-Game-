@@ -4,7 +4,11 @@ import React from "react";
 
 export function RelievingScenariosTable() {
   return (
-    <svg viewBox="0 0 700 500" className="w-full h-auto max-w-3xl mx-auto">
+    <svg 
+      viewBox="0 0 700 500" 
+      className="w-full h-auto"
+      preserveAspectRatio="xMidYMid meet"
+    >
       {/* Background */}
       <rect x="0" y="0" width="700" height="500" fill="#f8fafc" rx="8" />
 

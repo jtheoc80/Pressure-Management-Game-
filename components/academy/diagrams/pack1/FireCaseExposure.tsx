@@ -4,7 +4,7 @@ import { COLORS } from "@/lib/psv/brand";
 
 export default function FireCaseExposure() {
   return (
-    <svg viewBox="0 0 800 480" className="w-full h-auto">
+    <svg viewBox="0 0 800 480" className="w-full h-auto" preserveAspectRatio="xMidYMid meet">
       <defs>
         <pattern id="grid-fce" width="20" height="20" patternUnits="userSpaceOnUse">
           <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#e2e8f0" strokeWidth="0.5" />

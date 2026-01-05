@@ -14,12 +14,11 @@ interface VaporControlPathDiagramProps {
  */
 export function VaporControlPathDiagram({ className = "" }: VaporControlPathDiagramProps) {
   return (
-    <div className={`bg-white border border-slate-200 rounded-lg p-4 ${className}`}>
-      <svg
-        viewBox="0 0 700 380"
-        className="w-full h-auto"
-        style={{ maxHeight: "380px" }}
-      >
+    <svg
+      viewBox="0 0 700 380"
+      className={`w-full h-auto ${className}`}
+      preserveAspectRatio="xMidYMid meet"
+    >
         {/* Background */}
         <rect width="700" height="380" fill="#F8FAFC" />
 
@@ -154,6 +153,5 @@ export function VaporControlPathDiagram({ className = "" }: VaporControlPathDiag
           </marker>
         </defs>
       </svg>
-    </div>
   );
 }

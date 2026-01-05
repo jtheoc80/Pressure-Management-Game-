@@ -19,7 +19,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { Step } from "@/lib/academy/course";
-import { CanvasFrame } from "./CanvasFrame";
 import { DiagramRenderer } from "./DiagramRenderer";
 import { DrillBlock } from "./DrillBlock";
 import { Quiz } from "./Quiz";
@@ -198,13 +197,12 @@ function ExplainStep({ step }: { step: Extract<Step, { type: "explain" }> }) {
 function DiagramStepComponent({ step }: { step: Extract<Step, { type: "diagram" }> }) {
   return (
     <div className="space-y-4">
-      <CanvasFrame aspectRatio="16/9">
-        <DiagramRenderer diagramKey={step.diagramKey} />
-      </CanvasFrame>
-      
-      {step.caption && (
-        <p className="text-sm text-slate-500 text-center italic">{step.caption}</p>
-      )}
+      {/* DiagramRenderer now handles its own frame with expand functionality */}
+      <DiagramRenderer 
+        diagramKey={step.diagramKey} 
+        caption={step.caption}
+        className="my-0"
+      />
 
       {step.stopAndCheck && step.stopAndCheck.length > 0 && (
         <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mt-4">

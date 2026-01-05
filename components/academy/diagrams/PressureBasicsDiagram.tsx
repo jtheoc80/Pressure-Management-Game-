@@ -13,12 +13,11 @@ interface PressureBasicsDiagramProps {
  */
 export function PressureBasicsDiagram({ className = "" }: PressureBasicsDiagramProps) {
   return (
-    <div className={`bg-white border border-slate-200 rounded-lg p-4 ${className}`}>
-      <svg
-        viewBox="0 0 600 400"
-        className="w-full h-auto"
-        style={{ maxHeight: "400px" }}
-      >
+    <svg
+      viewBox="0 0 600 400"
+      className={`w-full h-auto ${className}`}
+      preserveAspectRatio="xMidYMid meet"
+    >
         {/* Background grid */}
         <defs>
           <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
@@ -155,6 +154,5 @@ export function PressureBasicsDiagram({ className = "" }: PressureBasicsDiagramP
           </text>
         </g>
       </svg>
-    </div>
   );
 }
