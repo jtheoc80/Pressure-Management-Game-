@@ -6,12 +6,45 @@ import { Card, CardContent } from "@/components/ui/card";
 import { diagramRegistry, hasDiagram, getDiagramKeys } from "@/lib/academy/diagramRegistry";
 import { diagramComponents } from "./diagrams";
 import { useLessonProgressOptional } from "./LessonProgressProvider";
-import { CanvasFrameAuto } from "./CanvasFrame";
+import { DiagramFrame } from "./DiagramFrame";
+
+// Diagrams that are particularly wide and need horizontal scroll on mobile
+const WIDE_DIAGRAMS = new Set([
+  "relieving-scenarios",
+  "api-521-scenarios",
+  "relieving-case-decision-tree",
+  "sizing-workflow",
+  "sizing-checklist",
+  "datasheet-gas",
+  "datasheet-steam",
+  "datasheet-liquid",
+  "vapor-control-map",
+  "vapor-decision",
+  "overfill-timeline",
+  "api-2350-timeline",
+  "common-mistakes",
+  "mistake-wall",
+]);
+
+// Minimum canvas widths for specific diagrams (allows horizontal scroll on mobile)
+const DIAGRAM_MIN_WIDTHS: Record<string, number> = {
+  "relieving-scenarios": 700,
+  "api-521-scenarios": 700,
+  "relieving-case-decision-tree": 760,
+  "datasheet-gas": 800,
+  "datasheet-steam": 800,
+  "datasheet-liquid": 800,
+};
 
 interface DiagramRendererProps {
   diagramKey: string;
   caption?: string;
+  title?: string;
   className?: string;
+  /** Override the default expandable behavior */
+  expandable?: boolean;
+  /** Override the minimum canvas width for mobile horizontal scroll */
+  minCanvasWidth?: number;
 }
 
 /**
@@ -21,12 +54,16 @@ interface DiagramRendererProps {
  * - Looks up diagrams in both diagramRegistry and legacy diagramComponents
  * - Shows a visible error box if diagram key is not found
  * - Tracks viewing via lesson progress checkpoints
- * - Ensures stable container with minimum height
+ * - Wraps in DiagramFrame for responsive sizing and expand functionality
+ * - Enables horizontal scroll on mobile for wide diagrams
  */
 export function DiagramRenderer({
   diagramKey,
   caption,
+  title,
   className = "",
+  expandable = true,
+  minCanvasWidth,
 }: DiagramRendererProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [hasViewed, setHasViewed] = useState(false);
@@ -97,18 +134,21 @@ export function DiagramRenderer({
     );
   }
 
+  // Determine if this diagram needs horizontal scroll on mobile
+  const isWideDiagram = WIDE_DIAGRAMS.has(diagramKey);
+  const effectiveMinCanvasWidth = minCanvasWidth ?? DIAGRAM_MIN_WIDTHS[diagramKey];
+
   return (
     <div ref={containerRef} className={`my-6 ${className}`}>
-      <CanvasFrameAuto minHeight={200} className="bg-white">
-        <div className="w-full [&_svg]:w-full [&_svg]:h-auto [&_svg]:block">
-          <DiagramComponent />
-        </div>
-      </CanvasFrameAuto>
-      {caption && (
-        <p className="text-sm text-gray-500 text-center mt-2 italic">
-          {caption}
-        </p>
-      )}
+      <DiagramFrame
+        title={title}
+        caption={caption}
+        expandable={expandable}
+        minCanvasWidth={effectiveMinCanvasWidth}
+        minHeight={isWideDiagram ? 420 : 360}
+      >
+        <DiagramComponent />
+      </DiagramFrame>
     </div>
   );
 }

@@ -4,7 +4,11 @@ import { COLORS } from "@/lib/psv/brand";
 
 export default function RelievingCaseDecisionTree() {
   return (
-    <svg viewBox="0 0 800 500" className="w-full h-auto">
+    <svg 
+      viewBox="0 0 800 500" 
+      className="w-full h-auto"
+      preserveAspectRatio="xMidYMid meet"
+    >
       {/* Background with subtle grid */}
       <defs>
         <pattern id="grid-rcd" width="20" height="20" patternUnits="userSpaceOnUse">

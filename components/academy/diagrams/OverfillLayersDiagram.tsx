@@ -15,12 +15,11 @@ interface OverfillLayersDiagramProps {
  */
 export function OverfillLayersDiagram({ className = "" }: OverfillLayersDiagramProps) {
   return (
-    <div className={`bg-white border border-slate-200 rounded-lg p-4 ${className}`}>
-      <svg
-        viewBox="0 0 700 400"
-        className="w-full h-auto"
-        style={{ maxHeight: "400px" }}
-      >
+    <svg
+      viewBox="0 0 700 400"
+      className={`w-full h-auto ${className}`}
+      preserveAspectRatio="xMidYMid meet"
+    >
         {/* Background */}
         <rect width="700" height="400" fill="#F8FAFC" />
 
@@ -140,6 +139,5 @@ export function OverfillLayersDiagram({ className = "" }: OverfillLayersDiagramP
           </marker>
         </defs>
       </svg>
-    </div>
   );
 }

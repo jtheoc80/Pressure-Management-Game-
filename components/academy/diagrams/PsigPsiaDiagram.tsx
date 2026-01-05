@@ -4,7 +4,11 @@ import React from "react";
 
 export function PsigPsiaDiagram() {
   return (
-    <svg viewBox="0 0 600 400" className="w-full h-auto max-w-2xl mx-auto">
+    <svg 
+      viewBox="0 0 600 400" 
+      className="w-full h-auto"
+      preserveAspectRatio="xMidYMid meet"
+    >
       <defs>
         <linearGradient id="scaleGradient" x1="0%" y1="0%" x2="0%" y2="100%">
           <stop offset="0%" stopColor="#003366" />

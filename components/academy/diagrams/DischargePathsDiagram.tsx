@@ -4,7 +4,11 @@ import React from "react";
 
 export function DischargePathsDiagram() {
   return (
-    <svg viewBox="0 0 700 450" className="w-full h-auto max-w-3xl mx-auto">
+    <svg 
+      viewBox="0 0 700 450" 
+      className="w-full h-auto"
+      preserveAspectRatio="xMidYMid meet"
+    >
       <defs>
         <marker id="flowArrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
           <polygon points="0 0, 8 3, 0 6" fill="#003366" />
