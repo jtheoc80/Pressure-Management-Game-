@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScoreBreakdown, CompetencyChips } from "@/components/psv";
-import { PreviewModeBannerCompact } from "@/components/PreviewModeBanner";
+import { AccessModeBanner } from "@/components/PreviewModeBanner";
+import { isGuestAccessEnabled } from "@/lib/guest-access";
 import {
   getScenarioById,
   scenarios,
@@ -30,6 +31,18 @@ export default function ResultsPage() {
   
   // Detect preview mode from URL
   const isPreviewMode = searchParams.get("preview") === "1";
+  
+  // Check if guest access mode is enabled
+  const isGuestMode = useMemo(() => {
+    if (isGuestAccessEnabled()) return true;
+    if (typeof window !== "undefined") {
+      return document.cookie.includes("guest_access=true");
+    }
+    return false;
+  }, []);
+  
+  // Combined access mode
+  const hasFullAccess = isGuestMode || isPreviewMode;
 
   useEffect(() => {
     const loadData = () => {
@@ -39,8 +52,8 @@ export default function ResultsPage() {
         const parsedResult = JSON.parse(storedResult) as GradeResult;
         setResult(parsedResult);
 
-        // Update profile only once - SKIP in preview mode to avoid polluting progress
-        if (!profileUpdated && !isPreviewMode) {
+        // Update profile only once - SKIP in guest/preview mode to avoid polluting progress
+        if (!profileUpdated && !hasFullAccess) {
           const updatedProfile = updateProfileWithResult(scenarioId, parsedResult);
           setProfile(updatedProfile);
 
@@ -58,8 +71,8 @@ export default function ResultsPage() {
           saveAttempt(scenarioId, attemptRecord);
 
           setProfileUpdated(true);
-        } else if (isPreviewMode) {
-          // In preview mode, just load profile without updating
+        } else if (hasFullAccess) {
+          // In guest/preview mode, just load profile without updating
           setProfile(getProfile());
           setProfileUpdated(true);
         }
@@ -79,7 +92,7 @@ export default function ResultsPage() {
       setIsLoading(false);
     };
     loadData();
-  }, [scenarioId, profileUpdated, profile, isPreviewMode]);
+  }, [scenarioId, profileUpdated, profile, hasFullAccess]);
 
   // Find next scenario
   const currentIndex = scenarios.findIndex((s) => s.id === scenarioId);
@@ -150,9 +163,9 @@ export default function ResultsPage() {
   const hasCaps = result.capsApplied && result.capsApplied.length > 0;
 
   return (
-    <div className={`min-h-screen bg-[var(--puffer-bg)] ${isPreviewMode ? "pt-8" : ""}`}>
-      {/* Preview Mode Banner */}
-      <PreviewModeBannerCompact isEnabled={isPreviewMode} />
+    <div className={`min-h-screen bg-[var(--puffer-bg)] ${hasFullAccess ? "pt-8" : ""}`}>
+      {/* Access Mode Banner (Guest or Preview) */}
+      <AccessModeBanner isPreviewMode={isPreviewMode} isGuestMode={isGuestMode} />
       
       {/* Header */}
       <header className="bg-white border-b border-[var(--puffer-border)]">
@@ -262,15 +275,17 @@ export default function ResultsPage() {
           {/* Score Breakdown */}
           <ScoreBreakdown result={result} />
 
-          {/* Preview Mode Notice */}
-          {isPreviewMode && (
-            <Card className="border-amber-300 bg-amber-50">
+          {/* Guest/Preview Mode Notice */}
+          {hasFullAccess && (
+            <Card className={`${isGuestMode ? "border-emerald-300 bg-emerald-50" : "border-amber-300 bg-amber-50"}`}>
               <CardContent className="py-4">
                 <div className="flex items-center gap-3">
-                  <span className="text-2xl">⚠️</span>
+                  <span className="text-2xl">{isGuestMode ? "👤" : "⚠️"}</span>
                   <div>
-                    <h4 className="font-semibold text-amber-800">Preview Mode Active</h4>
-                    <p className="text-sm text-amber-700">
+                    <h4 className={`font-semibold ${isGuestMode ? "text-emerald-800" : "text-amber-800"}`}>
+                      {isGuestMode ? "Guest Access Mode" : "Preview Mode Active"}
+                    </h4>
+                    <p className={`text-sm ${isGuestMode ? "text-emerald-700" : "text-amber-700"}`}>
                       This attempt was not saved. XP, badges, and progress were not recorded.
                     </p>
                   </div>
@@ -283,7 +298,7 @@ export default function ResultsPage() {
           <Card className="border-[var(--puffer-border)]">
             <CardHeader>
               <CardTitle className="text-base text-[var(--puffer-navy)]">
-                Points Earned {isPreviewMode && <span className="text-amber-600 text-sm font-normal">(Not Saved)</span>}
+                Points Earned {hasFullAccess && <span className={`text-sm font-normal ${isGuestMode ? "text-emerald-600" : "text-amber-600"}`}>(Not Saved)</span>}
               </CardTitle>
             </CardHeader>
             <CardContent>

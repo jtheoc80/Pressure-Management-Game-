@@ -5,13 +5,14 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { SignInButton } from "@clerk/nextjs";
 import { isClerkConfigured, useSafeUser } from "@/lib/auth";
+import { isGuestAccessEnabled } from "@/lib/guest-access";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { LevelCard } from "@/components/psv/LevelCard";
 import { CompetencyBars } from "@/components/psv/CompetencyBars";
-import { PreviewModeBannerCompact } from "@/components/PreviewModeBanner";
+import { AccessModeBanner } from "@/components/PreviewModeBanner";
 import { scenarios, getProfile, getRankProgress } from "@/lib/psv";
 import { getRequiredLessonsForUnlock } from "@/lib/academy/lessons";
 import type { PlayerProfile, Scenario } from "@/lib/psv/types";
@@ -25,6 +26,19 @@ function PSVQuestLobbyInner() {
   const [academyProgress, setAcademyProgress] = useState<UserProgress | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showHardOnly, setShowHardOnly] = useState(false);
+
+  // Check if guest access mode is enabled (allows playing without login)
+  const isGuestMode = useMemo(() => {
+    // Check lib config
+    if (isGuestAccessEnabled()) {
+      return true;
+    }
+    // Check for guest_access cookie set by middleware
+    if (typeof window !== "undefined") {
+      return document.cookie.includes("guest_access=true");
+    }
+    return false;
+  }, []);
 
   // Compute preview mode directly from URL params and cookies (no setState needed)
   const isPreviewMode = useMemo(() => {
@@ -46,6 +60,9 @@ function PSVQuestLobbyInner() {
     
     return previewParam;
   }, [searchParams]);
+
+  // Combined access mode - either guest mode or preview mode grants full access
+  const hasFullAccess = isGuestMode || isPreviewMode;
 
   useEffect(() => {
     const loadData = async () => {
@@ -73,8 +90,8 @@ function PSVQuestLobbyInner() {
     }
   }, [isSignedIn, clerkLoaded]);
 
-  // Check if PSV play is unlocked (preview mode bypasses this)
-  const isPSVUnlocked = isPreviewMode || academyProgress?.unlocks.psv_play || false;
+  // Check if PSV play is unlocked (guest mode or preview mode bypasses this)
+  const isPSVUnlocked = hasFullAccess || academyProgress?.unlocks.psv_play || false;
   const isCoachModeOn = academyProgress?.coachModeEnabled ?? true;
   const requiredLessons = getRequiredLessonsForUnlock("psv_play");
 
@@ -87,8 +104,8 @@ function PSVQuestLobbyInner() {
   }
 
   const rankProgress = getRankProgress(profile.xp);
-  // Preview mode unlocks hard mode for content review
-  const isHardModeUnlocked = isPreviewMode || (profile.hardModeProgress?.isUnlocked || false);
+  // Guest mode or preview mode unlocks hard mode for content review
+  const isHardModeUnlocked = hasFullAccess || (profile.hardModeProgress?.isUnlocked || false);
   const qualifyingAttempts = profile.hardModeProgress?.qualifyingAttempts || 0;
 
   // Filter scenarios
@@ -134,9 +151,9 @@ function PSVQuestLobbyInner() {
   };
 
   return (
-    <div className={`min-h-screen bg-slate-50 ${isPreviewMode ? "pt-8" : ""}`}>
-      {/* Preview Mode Banner */}
-      <PreviewModeBannerCompact isEnabled={isPreviewMode} />
+    <div className={`min-h-screen bg-slate-50 ${hasFullAccess ? "pt-8" : ""}`}>
+      {/* Access Mode Banner (Guest or Preview) */}
+      <AccessModeBanner isPreviewMode={isPreviewMode} isGuestMode={isGuestMode} />
       
       {/* Header */}
       <header className="bg-gradient-to-r from-[#0B1F3B] to-[#12345A] text-white">
@@ -167,6 +184,17 @@ function PSVQuestLobbyInner() {
                     </Button>
                   </Link>
                 </div>
+              ) : isGuestMode ? (
+                <div className="flex items-center gap-2">
+                  <span className="px-2 py-1 bg-emerald-500/20 text-emerald-200 text-xs rounded-full">
+                    👤 Guest Access
+                  </span>
+                  <Link href="/learn">
+                    <Button variant="secondary" size="sm">
+                      Training Academy
+                    </Button>
+                  </Link>
+                </div>
               ) : (
                 clerkConfigured ? (
                   <SignInButton mode="modal">
@@ -188,8 +216,8 @@ function PSVQuestLobbyInner() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-6">
-        {/* Auth & Gating Check */}
-        {!isSignedIn && (
+        {/* Auth & Gating Check - Hide in guest mode */}
+        {!isSignedIn && !isGuestMode && (
           <Alert className="mb-6 border-amber-200 bg-amber-50">
             <AlertDescription className="flex items-center justify-between">
               <span className="text-amber-800">
@@ -212,7 +240,18 @@ function PSVQuestLobbyInner() {
           </Alert>
         )}
 
-        {isSignedIn && !isPSVUnlocked && (
+        {/* Guest Mode Banner */}
+        {isGuestMode && !isSignedIn && (
+          <Alert className="mb-6 border-emerald-200 bg-emerald-50">
+            <AlertDescription className="flex items-center justify-between">
+              <span className="text-emerald-800">
+                <strong>Guest Access Mode:</strong> All training scenarios are unlocked for content review. Progress won&apos;t be saved.
+              </span>
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {isSignedIn && !isPSVUnlocked && !hasFullAccess && (
           <Alert className="mb-6 border-blue-200 bg-blue-50">
             <AlertDescription>
               <div className="flex items-center justify-between">
@@ -527,11 +566,11 @@ function PSVQuestLobbyInner() {
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
               {displayedScenarios.map((scenario, index) => {
                 // Check unlock status - combines both training gate and progress unlock
-                // Preview mode bypasses all locks
+                // Guest mode or preview mode bypasses all locks
                 const prevCompleted = index === 0 || profile.completedScenarios.includes(scenarios[index - 1].id);
                 const isLockedByProgress = showHardOnly ? false : (index > 0 && !prevCompleted);
                 const isLockedByTraining = !isPSVUnlocked;
-                const isLocked = isPreviewMode ? false : (isLockedByTraining || isLockedByProgress);
+                const isLocked = hasFullAccess ? false : (isLockedByTraining || isLockedByProgress);
 
                 const unlockReq = isLockedByTraining
                   ? "Complete PSV training first"

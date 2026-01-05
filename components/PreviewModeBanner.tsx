@@ -6,6 +6,11 @@ interface PreviewModeBannerProps {
   isEnabled: boolean;
 }
 
+interface AccessModeBannerProps {
+  isPreviewMode?: boolean;
+  isGuestMode?: boolean;
+}
+
 /**
  * Banner shown when preview/content-review mode is active
  * Warns users that progress won't be saved
@@ -50,6 +55,30 @@ export function PreviewModeBannerCompact({ isEnabled }: PreviewModeBannerProps) 
     <div className="fixed top-0 left-0 right-0 z-[100] bg-amber-400 text-amber-900 px-3 py-1.5 text-center text-sm font-medium shadow-sm">
       <span className="mr-2">⚠️</span>
       Preview Mode: Progress/XP not saved
+    </div>
+  );
+}
+
+/**
+ * Combined banner for guest or preview access modes
+ * Shows appropriate message based on which mode is active
+ */
+export function AccessModeBanner({ isPreviewMode, isGuestMode }: AccessModeBannerProps) {
+  if (!isPreviewMode && !isGuestMode) return null;
+
+  if (isPreviewMode) {
+    return (
+      <div className="fixed top-0 left-0 right-0 z-[100] bg-amber-400 text-amber-900 px-3 py-1.5 text-center text-sm font-medium shadow-sm">
+        <span className="mr-2">⚠️</span>
+        Preview Mode: Progress/XP not saved
+      </div>
+    );
+  }
+
+  return (
+    <div className="fixed top-0 left-0 right-0 z-[100] bg-emerald-400 text-emerald-900 px-3 py-1.5 text-center text-sm font-medium shadow-sm">
+      <span className="mr-2">👤</span>
+      Guest Access: All content unlocked for review
     </div>
   );
 }
