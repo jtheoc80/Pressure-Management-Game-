@@ -1,6 +1,7 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import type { NextRequest, NextFetchEvent } from "next/server";
+import { isGuestAccessEnabledServer } from "@/lib/guest-access";
 
 // Check if Clerk is configured (server-side check)
 const isClerkConfigured = () => {
@@ -41,6 +42,14 @@ const isPreviewModeEnabled = (req: NextRequest) => {
   return false;
 };
 
+/**
+ * Check if guest access mode is enabled
+ * Allows unauthenticated access to PSV Quest for content review
+ */
+const isGuestAccessMode = () => {
+  return isGuestAccessEnabledServer();
+};
+
 // Routes that require authentication
 const isProtectedRoute = createRouteMatcher([
   "/psv-quest(.*)",
@@ -77,6 +86,18 @@ export default function middleware(req: NextRequest, event: NextFetchEvent) {
       sameSite: "lax",
       path: "/",
       maxAge: 3600, // 1 hour
+    });
+    return response;
+  }
+  
+  // If guest access mode is enabled, allow PSV quest routes without auth
+  if (isGuestAccessMode()) {
+    const response = NextResponse.next();
+    response.cookies.set("guest_access", "true", {
+      httpOnly: false,
+      sameSite: "lax",
+      path: "/",
+      maxAge: 86400, // 24 hours
     });
     return response;
   }

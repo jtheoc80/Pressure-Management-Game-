@@ -4,7 +4,8 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useSafeUser } from "@/lib/auth";
-import { PreviewModeBannerCompact } from "@/components/PreviewModeBanner";
+import { isGuestAccessEnabled } from "@/lib/guest-access";
+import { AccessModeBanner } from "@/components/PreviewModeBanner";
 
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -93,15 +94,29 @@ export default function GameplayPage({ params }: PageProps) {
   // Preview mode state
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   
-  // Detect preview mode from URL
+  // Check if guest access mode is enabled
+  const [isGuestMode, setIsGuestMode] = useState(false);
+  
+  // Detect preview mode and guest mode
   useEffect(() => {
     const previewParam = searchParams.get("preview") === "1";
     if (previewParam) {
       setIsPreviewMode(true);
-      // In preview mode, unlock hard mode for content review
+      setIsHardModeUnlocked(true);
+    }
+    
+    // Check guest access mode
+    if (isGuestAccessEnabled()) {
+      setIsGuestMode(true);
+      setIsHardModeUnlocked(true);
+    } else if (typeof window !== "undefined" && document.cookie.includes("guest_access=true")) {
+      setIsGuestMode(true);
       setIsHardModeUnlocked(true);
     }
   }, [searchParams]);
+  
+  // Combined access mode - either guest mode or preview mode grants full access
+  const hasFullAccess = isGuestMode || isPreviewMode;
 
   // Load scenario, saved datasheet, and profile
   useEffect(() => {
@@ -290,12 +305,12 @@ export default function GameplayPage({ params }: PageProps) {
   const currentHint = coachModeEnabled && showCoachHint ? coachHints[showCoachHint] : null;
 
   return (
-    <div className={`min-h-screen bg-[var(--puffer-bg)] ${isPreviewMode ? "pt-8" : ""}`}>
-      {/* Preview Mode Banner */}
-      <PreviewModeBannerCompact isEnabled={isPreviewMode} />
+    <div className={`min-h-screen bg-[var(--puffer-bg)] ${hasFullAccess ? "pt-8" : ""}`}>
+      {/* Access Mode Banner (Guest or Preview) */}
+      <AccessModeBanner isPreviewMode={isPreviewMode} isGuestMode={isGuestMode} />
       
       {/* Header */}
-      <header className={`bg-white border-b border-[var(--puffer-border)] sticky ${isPreviewMode ? "top-8" : "top-0"} z-10`}>
+      <header className={`bg-white border-b border-[var(--puffer-border)] sticky ${hasFullAccess ? "top-8" : "top-0"} z-10`}>
         <div className="max-w-7xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
