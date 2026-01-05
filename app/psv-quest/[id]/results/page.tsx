@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScoreBreakdown, CompetencyChips } from "@/components/psv";
+import { PreviewModeBannerCompact } from "@/components/PreviewModeBanner";
 import {
   getScenarioById,
   scenarios,
@@ -18,6 +19,7 @@ import type { GradeResult, Scenario, PlayerProfile, AttemptRecord } from "@/lib/
 
 export default function ResultsPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const scenarioId = params.id as string;
 
   const [result, setResult] = useState<GradeResult | null>(null);
@@ -25,6 +27,9 @@ export default function ResultsPage() {
   const [profile, setProfile] = useState<PlayerProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [profileUpdated, setProfileUpdated] = useState(false);
+  
+  // Detect preview mode from URL
+  const isPreviewMode = searchParams.get("preview") === "1";
 
   useEffect(() => {
     const loadData = () => {
@@ -34,8 +39,8 @@ export default function ResultsPage() {
         const parsedResult = JSON.parse(storedResult) as GradeResult;
         setResult(parsedResult);
 
-        // Update profile only once
-        if (!profileUpdated) {
+        // Update profile only once - SKIP in preview mode to avoid polluting progress
+        if (!profileUpdated && !isPreviewMode) {
           const updatedProfile = updateProfileWithResult(scenarioId, parsedResult);
           setProfile(updatedProfile);
 
@@ -52,6 +57,10 @@ export default function ResultsPage() {
           };
           saveAttempt(scenarioId, attemptRecord);
 
+          setProfileUpdated(true);
+        } else if (isPreviewMode) {
+          // In preview mode, just load profile without updating
+          setProfile(getProfile());
           setProfileUpdated(true);
         }
       }
@@ -70,7 +79,7 @@ export default function ResultsPage() {
       setIsLoading(false);
     };
     loadData();
-  }, [scenarioId, profileUpdated, profile]);
+  }, [scenarioId, profileUpdated, profile, isPreviewMode]);
 
   // Find next scenario
   const currentIndex = scenarios.findIndex((s) => s.id === scenarioId);
@@ -141,7 +150,10 @@ export default function ResultsPage() {
   const hasCaps = result.capsApplied && result.capsApplied.length > 0;
 
   return (
-    <div className="min-h-screen bg-[var(--puffer-bg)]">
+    <div className={`min-h-screen bg-[var(--puffer-bg)] ${isPreviewMode ? "pt-8" : ""}`}>
+      {/* Preview Mode Banner */}
+      <PreviewModeBannerCompact isEnabled={isPreviewMode} />
+      
       {/* Header */}
       <header className="bg-white border-b border-[var(--puffer-border)]">
         <div className="max-w-4xl mx-auto px-4 py-4">
@@ -250,11 +262,28 @@ export default function ResultsPage() {
           {/* Score Breakdown */}
           <ScoreBreakdown result={result} />
 
+          {/* Preview Mode Notice */}
+          {isPreviewMode && (
+            <Card className="border-amber-300 bg-amber-50">
+              <CardContent className="py-4">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">⚠️</span>
+                  <div>
+                    <h4 className="font-semibold text-amber-800">Preview Mode Active</h4>
+                    <p className="text-sm text-amber-700">
+                      This attempt was not saved. XP, badges, and progress were not recorded.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+          
           {/* Points Summary (New) */}
           <Card className="border-[var(--puffer-border)]">
             <CardHeader>
               <CardTitle className="text-base text-[var(--puffer-navy)]">
-                Points Earned
+                Points Earned {isPreviewMode && <span className="text-amber-600 text-sm font-normal">(Not Saved)</span>}
               </CardTitle>
             </CardHeader>
             <CardContent>

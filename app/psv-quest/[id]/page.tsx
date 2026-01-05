@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useSafeUser } from "@/lib/auth";
+import { PreviewModeBannerCompact } from "@/components/PreviewModeBanner";
 
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -88,6 +89,19 @@ export default function GameplayPage({ params }: PageProps) {
   const [hintsUsed] = useState(0); // Reserved for future hint system
   const [attachmentsOpened, setAttachmentsOpened] = useState(false);
   const [isHardModeUnlocked, setIsHardModeUnlocked] = useState(false);
+  
+  // Preview mode state
+  const [isPreviewMode, setIsPreviewMode] = useState(false);
+  
+  // Detect preview mode from URL
+  useEffect(() => {
+    const previewParam = searchParams.get("preview") === "1";
+    if (previewParam) {
+      setIsPreviewMode(true);
+      // In preview mode, unlock hard mode for content review
+      setIsHardModeUnlocked(true);
+    }
+  }, [searchParams]);
 
   // Load scenario, saved datasheet, and profile
   useEffect(() => {
@@ -276,9 +290,12 @@ export default function GameplayPage({ params }: PageProps) {
   const currentHint = coachModeEnabled && showCoachHint ? coachHints[showCoachHint] : null;
 
   return (
-    <div className="min-h-screen bg-[var(--puffer-bg)]">
+    <div className={`min-h-screen bg-[var(--puffer-bg)] ${isPreviewMode ? "pt-8" : ""}`}>
+      {/* Preview Mode Banner */}
+      <PreviewModeBannerCompact isEnabled={isPreviewMode} />
+      
       {/* Header */}
-      <header className="bg-white border-b border-[var(--puffer-border)] sticky top-0 z-10">
+      <header className={`bg-white border-b border-[var(--puffer-border)] sticky ${isPreviewMode ? "top-8" : "top-0"} z-10`}>
         <div className="max-w-7xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">

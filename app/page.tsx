@@ -1,20 +1,33 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense, useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { SignInButton, UserButton } from "@clerk/nextjs";
 import { isClerkConfigured, useSafeUser } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { HeroVisualCard, ProofBar, GuidedPath, Outcomes } from "@/components/landing";
+import { PreviewModeBannerCompact } from "@/components/PreviewModeBanner";
 import { getRequiredLessonsForUnlock } from "@/lib/academy/lessons";
 import { getProfile } from "@/lib/psv";
 import type { UserProgress } from "@/lib/academy/types";
 
-export default function Home() {
+function HomeInner() {
   const { isSignedIn, isLoaded: clerkLoaded } = useSafeUser();
+  const searchParams = useSearchParams();
   const [academyProgress, setAcademyProgress] = useState<UserProgress | null>(null);
   const clerkConfigured = isClerkConfigured();
+  
+  // Compute preview mode from URL params and cookies
+  const isPreviewMode = useMemo(() => {
+    const previewParam = searchParams.get("preview") === "1";
+    if (typeof window !== "undefined") {
+      const previewCookie = document.cookie.includes("preview_mode=true");
+      return previewParam || previewCookie;
+    }
+    return previewParam;
+  }, [searchParams]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -36,21 +49,24 @@ export default function Home() {
     }
   }, [isSignedIn, clerkLoaded]);
 
-  // Get unlock status and progress
-  const isPSVUnlocked = academyProgress?.unlocks.psv_play || false;
+  // Get unlock status and progress (preview mode unlocks everything)
+  const isPSVUnlocked = isPreviewMode || academyProgress?.unlocks.psv_play || false;
   const requiredLessons = getRequiredLessonsForUnlock("psv_play");
   const completedRequired = requiredLessons.filter(
     (lesson) => academyProgress?.lessonProgress[lesson.id]?.completedAt != null
   ).length;
 
-  // Hard mode status from local profile
+  // Hard mode status from local profile (preview mode unlocks everything)
   const profile = typeof window !== 'undefined' ? getProfile() : null;
-  const isHardModeUnlocked = profile?.hardModeProgress?.isUnlocked || false;
+  const isHardModeUnlocked = isPreviewMode || (profile?.hardModeProgress?.isUnlocked || false);
 
   return (
-    <div className="min-h-screen bg-[#F5F7FA]">
+    <div className={`min-h-screen bg-[#F5F7FA] ${isPreviewMode ? "pt-8" : ""}`}>
+      {/* Preview Mode Banner */}
+      <PreviewModeBannerCompact isEnabled={isPreviewMode} />
+      
       {/* Navigation Header */}
-      <header className="sticky top-0 z-50 bg-[#0B1F3B]/95 backdrop-blur-sm border-b border-white/10">
+      <header className={`sticky ${isPreviewMode ? "top-8" : "top-0"} z-50 bg-[#0B1F3B]/95 backdrop-blur-sm border-b border-white/10`}>
         <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
           {/* Left: Logo/Brand */}
           <Link href="/" className="flex items-center gap-2">
@@ -156,7 +172,7 @@ export default function Home() {
               {/* CTAs */}
               <div className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">
                 {/* Primary CTA */}
-                <Link href="/learn">
+                <Link href={isPreviewMode ? "/learn?preview=1" : "/learn"}>
                   <Button 
                     size="lg" 
                     className="bg-teal-600 hover:bg-teal-700 text-white min-w-[180px] h-12 text-base font-semibold shadow-lg shadow-teal-900/30"
@@ -170,7 +186,7 @@ export default function Home() {
 
                 {/* Secondary CTA - Scenarios */}
                 {isPSVUnlocked ? (
-                  <Link href="/psv-quest">
+                  <Link href={isPreviewMode ? "/psv-quest?preview=1" : "/psv-quest"}>
                     <Button 
                       size="lg" 
                       variant="outline" 
@@ -234,6 +250,7 @@ export default function Home() {
         completedRequiredLessons={completedRequired}
         totalRequiredLessons={requiredLessons.length}
         isHardModeUnlocked={isHardModeUnlocked}
+        isPreviewMode={isPreviewMode}
       />
 
       {/* Outcomes Section */}
@@ -278,5 +295,14 @@ export default function Home() {
         </div>
       </footer>
     </div>
+  );
+}
+
+// Default export with Suspense wrapper for useSearchParams
+export default function Home() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#F5F7FA] flex items-center justify-center"><div className="text-slate-500">Loading...</div></div>}>
+      <HomeInner />
+    </Suspense>
   );
 }

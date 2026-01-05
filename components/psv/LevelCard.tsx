@@ -21,6 +21,7 @@ interface LevelCardProps {
   unlockRequirement?: string;
   isHardModeUnlocked?: boolean;
   showHardBadge?: boolean;
+  isPreviewMode?: boolean;
 }
 
 export function LevelCard({
@@ -32,6 +33,7 @@ export function LevelCard({
   unlockRequirement = "Complete the previous scenario",
   isHardModeUnlocked = false,
   showHardBadge = false,
+  isPreviewMode = false,
 }: LevelCardProps) {
   const thumbnailSvg = getThumbnailSvg(scenario.visuals.thumbnail);
   const difficultyInfo = getDifficultyInfo(scenario.difficulty);
@@ -232,11 +234,25 @@ export function LevelCard({
     return <div className="cursor-not-allowed">{CardContent}</div>;
   }
 
-  // If hard mode unlocked and this is a hard eligible scenario in hard filter, link to hard mode
-  const linkHref =
-    showHardBadge && scenario.isHardEligible && isHardModeUnlocked
-      ? `/psv-quest/${scenario.id}?mode=hard`
+  // Build link URL - preserve preview mode and handle hard mode
+  const buildLinkHref = () => {
+    const params = new URLSearchParams();
+    
+    if (showHardBadge && scenario.isHardEligible && isHardModeUnlocked) {
+      params.set("mode", "hard");
+    }
+    
+    if (isPreviewMode) {
+      params.set("preview", "1");
+    }
+    
+    const queryString = params.toString();
+    return queryString 
+      ? `/psv-quest/${scenario.id}?${queryString}`
       : `/psv-quest/${scenario.id}`;
+  };
+  
+  const linkHref = buildLinkHref();
 
   return (
     <Link href={linkHref} className="block">
