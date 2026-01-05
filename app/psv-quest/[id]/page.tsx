@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, useParams } from "next/navigation";
 import Link from "next/link";
 import { useSafeUser } from "@/lib/auth";
 import { isGuestAccessEnabled } from "@/lib/guest-access";
@@ -46,8 +46,6 @@ import type {
 } from "@/lib/psv/types";
 import type { UserProgress } from "@/lib/academy/types";
 
-type PageProps = { params: { id: string } };
-
 // Coach mode hints for different steps
 const coachHints: Record<string, { title: string; hint: string }> = {
   relievingCase: {
@@ -68,8 +66,9 @@ const coachHints: Record<string, { title: string; hint: string }> = {
   },
 };
 
-export default function GameplayPage({ params }: PageProps) {
-  const scenarioId = params.id;
+export default function GameplayPage() {
+  const params = useParams();
+  const scenarioId = params.id as string;
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isSignedIn } = useSafeUser();
