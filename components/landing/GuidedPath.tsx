@@ -10,6 +10,7 @@ interface GuidedPathProps {
   completedRequiredLessons: number;
   totalRequiredLessons: number;
   isHardModeUnlocked: boolean;
+  isPreviewMode?: boolean;
 }
 
 interface PathStep {
@@ -30,10 +31,14 @@ export function GuidedPath({
   completedRequiredLessons,
   totalRequiredLessons,
   isHardModeUnlocked,
+  isPreviewMode = false,
 }: GuidedPathProps) {
   const progressPercent = totalRequiredLessons > 0 
     ? Math.round((completedRequiredLessons / totalRequiredLessons) * 100) 
     : 0;
+
+  // Helper to add preview param to URLs
+  const withPreview = (url: string) => isPreviewMode ? `${url}?preview=1` : url;
 
   const steps: PathStep[] = [
     {
@@ -46,7 +51,7 @@ export function GuidedPath({
         "Progress tracking & unlocks",
       ],
       ctaText: "Start Learning",
-      ctaHref: "/learn",
+      ctaHref: withPreview("/learn"),
     },
     {
       number: 2,
@@ -58,7 +63,7 @@ export function GuidedPath({
         "Immediate feedback & scoring",
       ],
       ctaText: isPSVUnlocked ? "Play Scenarios" : "Locked",
-      ctaHref: "/psv-quest",
+      ctaHref: withPreview("/psv-quest"),
       isLocked: !isPSVUnlocked,
       lockReason: `Complete ${totalRequiredLessons - completedRequiredLessons} more lesson${totalRequiredLessons - completedRequiredLessons !== 1 ? 's' : ''} to unlock`,
       progress: progressPercent,
@@ -73,7 +78,7 @@ export function GuidedPath({
         "Earn specialist badges",
       ],
       ctaText: isHardModeUnlocked ? "Hard Mode" : "Score 85+ × 3",
-      ctaHref: "/psv-quest",
+      ctaHref: withPreview("/psv-quest"),
       isLocked: !isHardModeUnlocked,
       lockReason: "Score ≥85 on 3 standard scenarios",
     },

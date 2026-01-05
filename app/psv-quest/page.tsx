@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { SignInButton } from "@clerk/nextjs";
 import { isClerkConfigured, useSafeUser } from "@/lib/auth";
@@ -10,18 +11,41 @@ import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { LevelCard } from "@/components/psv/LevelCard";
 import { CompetencyBars } from "@/components/psv/CompetencyBars";
+import { PreviewModeBannerCompact } from "@/components/PreviewModeBanner";
 import { scenarios, getProfile, getRankProgress } from "@/lib/psv";
 import { getRequiredLessonsForUnlock } from "@/lib/academy/lessons";
 import type { PlayerProfile, Scenario } from "@/lib/psv/types";
 import type { UserProgress } from "@/lib/academy/types";
 
-export default function PSVQuestLobby() {
+function PSVQuestLobbyInner() {
   const { isSignedIn, isLoaded: clerkLoaded } = useSafeUser();
   const clerkConfigured = isClerkConfigured();
+  const searchParams = useSearchParams();
   const [profile, setProfile] = useState<PlayerProfile | null>(null);
   const [academyProgress, setAcademyProgress] = useState<UserProgress | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showHardOnly, setShowHardOnly] = useState(false);
+
+  // Compute preview mode directly from URL params and cookies (no setState needed)
+  const isPreviewMode = useMemo(() => {
+    // Check URL param for preview mode
+    const previewParam = searchParams.get("preview") === "1";
+    
+    // In production on Vercel, preview mode is always disabled
+    // This is a client-side check; server-side check is in middleware
+    if (typeof window !== "undefined") {
+      const isVercelProd = window.location.hostname.includes("vercel.app") || 
+                          window.location.hostname.includes(".com");
+      
+      // Check for server-injected preview mode via cookie
+      const previewCookie = document.cookie.includes("preview_mode=true");
+      
+      // Only enable preview if not in obvious production
+      return (previewParam || previewCookie) && !isVercelProd;
+    }
+    
+    return previewParam;
+  }, [searchParams]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -49,8 +73,8 @@ export default function PSVQuestLobby() {
     }
   }, [isSignedIn, clerkLoaded]);
 
-  // Check if PSV play is unlocked
-  const isPSVUnlocked = academyProgress?.unlocks.psv_play || false;
+  // Check if PSV play is unlocked (preview mode bypasses this)
+  const isPSVUnlocked = isPreviewMode || academyProgress?.unlocks.psv_play || false;
   const isCoachModeOn = academyProgress?.coachModeEnabled ?? true;
   const requiredLessons = getRequiredLessonsForUnlock("psv_play");
 
@@ -63,7 +87,8 @@ export default function PSVQuestLobby() {
   }
 
   const rankProgress = getRankProgress(profile.xp);
-  const isHardModeUnlocked = profile.hardModeProgress?.isUnlocked || false;
+  // Preview mode unlocks hard mode for content review
+  const isHardModeUnlocked = isPreviewMode || (profile.hardModeProgress?.isUnlocked || false);
   const qualifyingAttempts = profile.hardModeProgress?.qualifyingAttempts || 0;
 
   // Filter scenarios
@@ -109,7 +134,10 @@ export default function PSVQuestLobby() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className={`min-h-screen bg-slate-50 ${isPreviewMode ? "pt-8" : ""}`}>
+      {/* Preview Mode Banner */}
+      <PreviewModeBannerCompact isEnabled={isPreviewMode} />
+      
       {/* Header */}
       <header className="bg-gradient-to-r from-[#0B1F3B] to-[#12345A] text-white">
         <div className="max-w-7xl mx-auto px-4 py-6">
@@ -499,10 +527,11 @@ export default function PSVQuestLobby() {
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
               {displayedScenarios.map((scenario, index) => {
                 // Check unlock status - combines both training gate and progress unlock
+                // Preview mode bypasses all locks
                 const prevCompleted = index === 0 || profile.completedScenarios.includes(scenarios[index - 1].id);
                 const isLockedByProgress = showHardOnly ? false : (index > 0 && !prevCompleted);
                 const isLockedByTraining = !isPSVUnlocked;
-                const isLocked = isLockedByTraining || isLockedByProgress;
+                const isLocked = isPreviewMode ? false : (isLockedByTraining || isLockedByProgress);
 
                 const unlockReq = isLockedByTraining
                   ? "Complete PSV training first"
@@ -521,6 +550,7 @@ export default function PSVQuestLobby() {
                     unlockRequirement={unlockReq}
                     isHardModeUnlocked={isHardModeUnlocked}
                     showHardBadge={showHardOnly || scenario.isHardEligible}
+                    isPreviewMode={isPreviewMode}
                   />
                 );
               })}
@@ -576,5 +606,14 @@ export default function PSVQuestLobby() {
         </div>
       </footer>
     </div>
+  );
+}
+
+// Default export with Suspense wrapper for useSearchParams
+export default function PSVQuestLobby() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-slate-50 flex items-center justify-center"><div className="text-slate-500">Loading...</div></div>}>
+      <PSVQuestLobbyInner />
+    </Suspense>
   );
 }

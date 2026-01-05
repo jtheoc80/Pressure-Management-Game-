@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense, useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useSafeUser } from "@/lib/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,17 +10,30 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { BookOpen, FileText, GraduationCap, Target, CheckCircle2, Clock, Zap } from "lucide-react";
+import { PreviewModeBannerCompact } from "@/components/PreviewModeBanner";
 import { getLessonsByTrack, isLessonUnlocked } from "@/lib/academy/lessons";
 import { cases } from "@/lib/academy/cases";
 import { getDrillByLessonId } from "@/lib/academy/drills";
 import type { Lesson, UserProgress, LessonProgress } from "@/lib/academy/types";
 
-export default function LearnPage() {
+// Wrapper component to handle Suspense for useSearchParams
+function LearnPageInner() {
   const { isSignedIn, user } = useSafeUser();
+  const searchParams = useSearchParams();
   const [progress, setProgress] = useState<UserProgress | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("lessons");
   const [activeTrack, setActiveTrack] = useState<"psv" | "tank_flame">("psv");
+  
+  // Compute preview mode from URL params and cookies
+  const isPreviewMode = useMemo(() => {
+    const previewParam = searchParams.get("preview") === "1";
+    if (typeof window !== "undefined") {
+      const previewCookie = document.cookie.includes("preview_mode=true");
+      return previewParam || previewCookie;
+    }
+    return previewParam;
+  }, [searchParams]);
 
   useEffect(() => {
     async function loadProgress() {
@@ -72,7 +86,8 @@ export default function LearnPage() {
   const getLessonStatus = (lesson: Lesson) => {
     const lessonProgress = progress?.lessonProgress[lesson.id];
     const isCompleted = !!lessonProgress?.completedAt;
-    const isUnlocked = isLessonUnlocked(lesson.id, completedLessonIds);
+    // Preview mode unlocks all lessons
+    const isUnlocked = isPreviewMode || isLessonUnlocked(lesson.id, completedLessonIds);
     const drill = getDrillByLessonId(lesson.id);
     const drillCompleted = drill ? completedDrills.includes(drill.id) : true;
     
@@ -80,7 +95,10 @@ export default function LearnPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className={`min-h-screen bg-slate-50 ${isPreviewMode ? "pt-8" : ""}`}>
+      {/* Preview Mode Banner */}
+      <PreviewModeBannerCompact isEnabled={isPreviewMode} />
+      
       {/* Header */}
       <header className="bg-gradient-to-r from-[#0B1F3B] to-[#12345A] text-white">
         <div className="max-w-7xl mx-auto px-4 py-8">
@@ -351,6 +369,15 @@ export default function LearnPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+// Default export with Suspense wrapper for useSearchParams
+export default function LearnPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-slate-50 flex items-center justify-center"><div className="text-slate-500">Loading...</div></div>}>
+      <LearnPageInner />
+    </Suspense>
   );
 }
 
